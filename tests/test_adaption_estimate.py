@@ -18,13 +18,15 @@ class QuoteOnlyTests(unittest.TestCase):
         factory = Mock(return_value=client)
         report = estimate(VALID_ID, "test-key", client_factory=factory)
         factory.assert_called_once_with(api_key="test-key")
-        ds.adapt.assert_called_once_with(
-            VALID_ID,
-            estimate=True,
-            column_mapping={"prompt": "prompt", "completion": "completion"},
-            job_specification={"max_rows": 100},
-            training_type="instruction_dataset",
-        )
+        ds.adapt.assert_called_once()
+        args, kwargs = ds.adapt.call_args
+        self.assertEqual(args, (VALID_ID,))
+        self.assertEqual(kwargs["estimate"], True)
+        self.assertEqual(kwargs["column_mapping"], {"prompt": "prompt", "completion": "completion"})
+        self.assertEqual(kwargs["job_specification"]["max_rows"], 100)
+        self.assertIn(VALID_ID, kwargs["job_specification"]["idempotency_key"])
+        self.assertFalse(kwargs["recipe_specification"]["recipes"]["reasoning_traces"])
+        self.assertIn("Do not invent exchange rates", kwargs["brand_controls"]["blueprint"])
         self.assertEqual(report["estimated_credits"], 12.0)
         self.assertEqual(report["estimated_minutes"], 4.5)
 

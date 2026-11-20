@@ -2,9 +2,12 @@ name: PROOFBENCH paired adversarial tests
 
 on:
   push:
-    branches: [main, feature/proofbench-verifiable-eval-20261120]
+    branches: [main, feature/proofbench-verifiable-eval-20261120, feature/proofbench-guarded-adaption-20261120]
     paths:
       - 'proofbench/**'
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/proofbench-adaption-launch.yml'
       - 'tests/test_proofbench_contract.py'
       - 'tests/test_comparison.py'
       - 'tests/test_adaption_bridge.py'
@@ -12,10 +15,14 @@ on:
       - 'tests/test_adaption_estimate.py'
       - 'tests/test_overlap.py'
       - 'tests/test_submission_gate.py'
+      - 'tests/test_adaption_run.py'
       - '.github/workflows/proofbench-adversarial.yml'
   pull_request:
     paths:
       - 'proofbench/**'
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/proofbench-adaption-launch.yml'
       - 'tests/test_proofbench_contract.py'
       - 'tests/test_comparison.py'
       - 'tests/test_adaption_bridge.py'
@@ -23,6 +30,7 @@ on:
       - 'tests/test_adaption_estimate.py'
       - 'tests/test_overlap.py'
       - 'tests/test_submission_gate.py'
+      - 'tests/test_adaption_run.py'
       - '.github/workflows/proofbench-adversarial.yml'
   workflow_dispatch:
 
@@ -46,6 +54,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_adaption_estimate.py' -v
           python3 -m unittest discover -s tests -p 'test_overlap.py' -v
           python3 -m unittest discover -s tests -p 'test_submission_gate.py' -v
+          python3 -m unittest discover -s tests -p 'test_adaption_run.py' -v
       - name: Produce reproducible demonstration artifacts
         if: success()
         run: python3 -m proofbench.benchmark --output generated

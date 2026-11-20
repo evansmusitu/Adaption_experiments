@@ -1,0 +1,37 @@
+name: PROOFBENCH credit-capped adaptation (manual approval only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset_id:
+        description: 'Newly imported PROOFBENCH dataset UUID'
+        type: string
+        required: true
+      approval:
+        description: 'Exact phrase: I APPROVE UP TO 10 ADAPTION CREDITS'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proofbench-credit-pilot
+  cancel-in-progress: false
+
+jobs:
+  adapt:
+    if: github.ref == 'refs/heads/main'
+    environment: proofbench-adaption-launch
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install official Adaption SDK
+        run: python3 -m pip install --disable-pip-version-check adaption
+      - name: Check explicit approval, quote cost, and launch at most once
+        env:
+          ADAPTION_API_KEY: ${{ secrets.ADAPTION_API_KEY }}
+          PROOFBENCH_DATASET_ID: ${{ inputs.dataset_id }}
+          PROOFBENCH_CREDIT_APPROVAL: ${{ inputs.approval }}
+        run: python3 -m proofbench.adaption_run
