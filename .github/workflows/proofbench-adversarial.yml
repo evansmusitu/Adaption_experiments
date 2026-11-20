@@ -6,11 +6,13 @@ on:
     paths:
       - 'proofbench/**'
       - 'tests/test_proofbench_contract.py'
+      - 'tests/test_comparison.py'
       - '.github/workflows/proofbench-adversarial.yml'
   pull_request:
     paths:
       - 'proofbench/**'
       - 'tests/test_proofbench_contract.py'
+      - 'tests/test_comparison.py'
       - '.github/workflows/proofbench-adversarial.yml'
   workflow_dispatch:
 
@@ -26,7 +28,9 @@ jobs:
       - name: Contract tests (offline, no API secrets)
         env:
           PYTHONPATH: .
-        run: python3 -m unittest discover -s tests -p 'test_proofbench_contract.py' -v
+        run: |
+          python3 -m unittest discover -s tests -p 'test_proofbench_contract.py' -v
+          python3 -m unittest discover -s tests -p 'test_comparison.py' -v
       - name: Produce reproducible demonstration artifacts
         if: success()
         run: python3 -m proofbench.benchmark --output generated
