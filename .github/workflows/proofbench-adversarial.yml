@@ -11,6 +11,7 @@ on:
       - 'tests/test_independent_audit.py'
       - 'tests/test_adaption_estimate.py'
       - 'tests/test_overlap.py'
+      - 'tests/test_submission_gate.py'
       - '.github/workflows/proofbench-adversarial.yml'
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - 'tests/test_independent_audit.py'
       - 'tests/test_adaption_estimate.py'
       - 'tests/test_overlap.py'
+      - 'tests/test_submission_gate.py'
       - '.github/workflows/proofbench-adversarial.yml'
   workflow_dispatch:
 
@@ -43,6 +45,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_independent_audit.py' -v
           python3 -m unittest discover -s tests -p 'test_adaption_estimate.py' -v
           python3 -m unittest discover -s tests -p 'test_overlap.py' -v
+          python3 -m unittest discover -s tests -p 'test_submission_gate.py' -v
       - name: Produce reproducible demonstration artifacts
         if: success()
         run: python3 -m proofbench.benchmark --output generated
