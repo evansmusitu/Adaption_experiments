@@ -40,11 +40,25 @@ jobs:
           mkdir -p datasets
           cp generated/train.jsonl datasets/proofbench_train_240.jsonl
           cp generated/manifest.json datasets/proofbench_manifest.json
+          python3 - <<'PY'
+          import csv, json
+          from pathlib import Path
+          data=[json.loads(line) for line in Path('generated/train.jsonl').read_text().splitlines()]
+          assert len(data)==240
+          with Path('datasets/proofbench_train_240.csv').open('w',newline='',encoding='utf-8') as fh:
+              writer=csv.DictWriter(fh,fieldnames=['prompt','completion'])
+              writer.writeheader()
+              writer.writerows(data)
+          with Path('datasets/proofbench_train_240.csv').open(newline='',encoding='utf-8') as fh:
+              check=list(csv.DictReader(fh))
+          assert check==data, 'CSV export differs from verified JSONL'
+          print('Verified public CSV export: 240 rows')
+          PY
       - name: Commit public synthetic seed to this repository only
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add datasets/proofbench_train_240.jsonl datasets/proofbench_manifest.json
+          git add datasets/proofbench_train_240.jsonl datasets/proofbench_manifest.json datasets/proofbench_train_240.csv
           if git diff --cached --quiet; then
             echo "Seed already present and unchanged"
             exit 0
