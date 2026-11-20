@@ -8,6 +8,7 @@ on:
       - 'tests/test_proofbench_contract.py'
       - 'tests/test_comparison.py'
       - 'tests/test_adaption_bridge.py'
+      - 'tests/test_independent_audit.py'
       - '.github/workflows/proofbench-adversarial.yml'
   pull_request:
     paths:
@@ -15,6 +16,7 @@ on:
       - 'tests/test_proofbench_contract.py'
       - 'tests/test_comparison.py'
       - 'tests/test_adaption_bridge.py'
+      - 'tests/test_independent_audit.py'
       - '.github/workflows/proofbench-adversarial.yml'
   workflow_dispatch:
 
@@ -34,6 +36,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_proofbench_contract.py' -v
           python3 -m unittest discover -s tests -p 'test_comparison.py' -v
           python3 -m unittest discover -s tests -p 'test_adaption_bridge.py' -v
+          python3 -m unittest discover -s tests -p 'test_independent_audit.py' -v
       - name: Produce reproducible demonstration artifacts
         if: success()
         run: python3 -m proofbench.benchmark --output generated
