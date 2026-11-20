@@ -1,0 +1,53 @@
+name: Publish verified public PROOFBENCH seed (synthetic only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-proofbench-seed.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: proofbench-publish-seed
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout the isolated public research repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Regenerate and validate pre-registered synthetic dataset
+        run: |
+          python3 -m proofbench.benchmark --output generated
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          m=json.loads(Path('generated/manifest.json').read_text())
+          content=Path('generated/train.jsonl').read_bytes()
+          assert len(content.splitlines()) == 240
+          expected='d8f0aa9eeddb77bafe0e6d8b7d616501daa8d7f36487c9148e3860ce051205e5'
+          assert hashlib.sha256(content).hexdigest() == expected
+          assert m['sha256']['train.jsonl'] == expected
+          assert all(set(json.loads(line)) == {'prompt','completion'} for line in content.splitlines())
+          print('Verified synthetic rows: 240; SHA256:', expected)
+          PY
+          mkdir -p datasets
+          cp generated/train.jsonl datasets/proofbench_train_240.jsonl
+          cp generated/manifest.json datasets/proofbench_manifest.json
+      - name: Commit public synthetic seed to this repository only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add datasets/proofbench_train_240.jsonl datasets/proofbench_manifest.json
+          if git diff --cached --quiet; then
+            echo "Seed already present and unchanged"
+            exit 0
+          fi
+          git commit -m "Publish verified 240-row synthetic PROOFBENCH import source [skip ci]"
+          git push origin HEAD:main
