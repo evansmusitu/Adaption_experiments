@@ -24,6 +24,10 @@ The SDK explicitly uploads with `processing_mode="adapt"`, so the source is elig
 
 **Do not repeat a failed/uncertain upload before checking the Adaption account for an already-created dataset.** File upload may not be idempotent.
 
+Verify the new dataset with [PROOFBENCH import status (read-only)](../.github/workflows/proofbench-import-status.yml) on `main`, entering the returned dataset UUID. A successful readiness check requires status `awaiting_input` and exactly `240` source rows. It only calls `datasets.get_status`; it never launches adaptation or training.
+
+Do not assume that the upload's original `240` input rows were ingested merely because GitHub emitted a dataset ID; wait for an authenticated read-only status confirmation.
+
 ## Step 2 — Quote a 100-row financial adaptation (manual, estimate only)
 
 Open [Quote PROOFBENCH adaptation](../.github/workflows/proofbench-estimate.yml), choose `main`, and enter the new PROOFBENCH dataset UUID. The quote uses:
