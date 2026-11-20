@@ -9,18 +9,12 @@ from __future__ import annotations
 import json
 import math
 import os
-import re
 import sys
+
+from .adaption_config import MAX_ROWS, pilot_config
 
 APPROVAL_PHRASE = "I APPROVE UP TO 10 ADAPTION CREDITS"
 CREDIT_CEILING = 10.0
-MAX_ROWS = 100
-
-BLOCKED_INVENT_IDS = {
-    "61d434c2-b617-45b0-82f5-44771db25498",
-    "b17502e7-d482-4a5d-bae0-a9ea55b7bfe1",
-    "5ef42194-6814-45fb-8841-8116482928fa",
-}
 
 
 def launch_pilot(dataset_id, api_key, approval, git_ref, client_factory=None):
@@ -30,41 +24,11 @@ def launch_pilot(dataset_id, api_key, approval, git_ref, client_factory=None):
         raise PermissionError("Adaptation may only be dispatched on main")
     if not isinstance(api_key, str) or not api_key.strip():
         raise PermissionError("Adaption API key is missing")
-    if not isinstance(dataset_id, str) or not re.fullmatch(
-        r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
-        dataset_id,
-    ) or dataset_id in BLOCKED_INVENT_IDS:
-        raise ValueError("Dataset ID invalid or not a new PROOFBENCH import")
+    config = pilot_config(dataset_id)
     if client_factory is None:
         from adaption import Adaption
         client_factory = Adaption
 
-    # This set is identical between cost estimate and actual adaptation,
-    # except estimate=True is intentionally absent from the actual launch.
-    config = {
-        "column_mapping": {"prompt": "prompt", "completion": "completion"},
-        "training_type": "instruction_dataset",
-        "job_specification": {
-            "max_rows": MAX_ROWS,
-            "idempotency_key": "musitu-proofbench-v1-" + dataset_id,
-        },
-        "recipe_specification": {
-            "recipes": {
-                "prompt_rephrase": True,
-                "deduplication": True,
-                "reasoning_traces": False,
-            },
-        },
-        "brand_controls": {
-            "length": "concise",
-            "blueprint": (
-                "Maintain correct numerical amounts, units and business constraints. "
-                "Do not invent exchange rates, transaction identifiers, fees, taxes "
-                "or assumptions. State when the problem lacks essential data. "
-                "Preserve the original question's conditional financial meaning."
-            ),
-        },
-    }
     client = client_factory(api_key=api_key)
     quote = client.datasets.adapt(dataset_id, estimate=True, **config)
     if getattr(quote, "estimate", None) is not True or getattr(quote, "run_id", None) is not None:
