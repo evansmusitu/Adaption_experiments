@@ -105,6 +105,18 @@ def audit() -> int:
         safe_kind = kind if kind in ("uploaded", "combined", "invented", "augmented", "translated", "localized") else "unknown"
         safe_count = row_count if type(row_count) is int and row_count >= 0 else "unknown"
         print(f"Existing dataset {number}: status={safe_status}; kind={safe_kind}; row_count={safe_count}")
+        mapping = details.get("configured_column_mapping")
+        if isinstance(mapping, dict):
+            def safe_col(v):
+                return v if isinstance(v, str) and v.isidentifier() and len(v) <= 48 else "unavailable"
+            print(
+                f"Dataset {number} mapping: "
+                f"prompt={safe_col(mapping.get('prompt'))}; "
+                f"completion={safe_col(mapping.get('completion'))}; "
+                f"chat={safe_col(mapping.get('chat'))}"
+            )
+        else:
+            print(f"Dataset {number} mapping: not configured")
         summary = details.get("evaluation_summary")
         if isinstance(summary, dict):
             print(
