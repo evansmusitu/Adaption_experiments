@@ -1,0 +1,30 @@
+name: Adaption read-only connection audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/adaption-audit.yml'
+      - 'scripts/adaption_audit.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: adaption-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out trusted repository code
+        uses: actions/checkout@v4
+
+      - name: Verify Adaption secret and query read-only metadata
+        env:
+          ADAPTION_API_KEY: ${{ secrets.ADAPTION_API_KEY }}
+        run: |
+          python3 -B scripts/adaption_audit.py
