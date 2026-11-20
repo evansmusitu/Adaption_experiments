@@ -168,10 +168,10 @@ def validate_splits(parts: dict[str, list[dict]]) -> None:
 def _correct(expected: dict, predicted: dict | None) -> bool:
     if not isinstance(predicted, dict) or predicted.get("kind") != expected["kind"]:
         return False
-    if expected["kind"] == "clarify":
-        return predicted.get("value") is None
     if predicted.get("unit") != expected["unit"]:
         return False
+    if expected["kind"] == "clarify":
+        return predicted.get("value") is None
     value = predicted.get("value")
     if value is None or isinstance(value, bool):
         return False
