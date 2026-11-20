@@ -1,0 +1,30 @@
+name: Launch PROOFBENCH 100-row pilot (explicit credit approval)
+
+on:
+  workflow_dispatch:
+    inputs:
+      approval:
+        description: 'Type exactly: I APPROVE 10 ADAPTION CREDITS'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proofbench-100-row-v1
+  cancel-in-progress: false
+
+jobs:
+  launch:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    environment: proofbench-pilot
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain quote and launch once only if within 10-credit estimate
+        env:
+          ADAPTION_API_KEY: ${{ secrets.ADAPTION_API_KEY }}
+          PILOT_APPROVAL: ${{ inputs.approval }}
+        run: python3 -B scripts/launch_proofbench_pilot.py
