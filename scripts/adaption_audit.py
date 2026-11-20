@@ -7,6 +7,7 @@ the API are printed. Only the official HTTPS API host is contacted.
 from __future__ import annotations
 
 import collections
+import csv
 import json
 import os
 import sys
@@ -51,6 +52,31 @@ def api_get(resource: str, key: str) -> dict:
     if not isinstance(payload, dict):
         raise RuntimeError("Unexpected API response structure")
     return payload
+
+
+def header_only(dataset_id: str, key: str) -> list[str]:
+    """Inspect CSV field names without reading or logging any dataset rows."""
+    req = urllib.request.Request(
+        BASE + "/datasets/" + dataset_id + "/download?fileFormat=csv",
+        headers={
+            "Authorization": "Bearer " + key,
+            "Accept": "text/csv",
+            "User-Agent": "musitu-adaption-readonly-audit/1.0",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            header = response.readline(4097)
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError):
+        return []
+    if len(header) > 4096:
+        return []
+    try:
+        names = next(csv.reader([header.decode("utf-8-sig")]))
+    except (UnicodeDecodeError, ValueError, csv.Error, StopIteration):
+        return []
+    return [name for name in names if name.isidentifier() and len(name) <= 48][:30]
 
 
 def safe_metric(value: object) -> str:
@@ -117,6 +143,8 @@ def audit() -> int:
             )
         else:
             print(f"Dataset {number} mapping: not configured")
+        fields = header_only(dataset_id, key)
+        print(f"Dataset {number} safe CSV field names: {', '.join(fields) if fields else 'unavailable'}")
         summary = details.get("evaluation_summary")
         if isinstance(summary, dict):
             print(
