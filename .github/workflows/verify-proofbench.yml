@@ -1,0 +1,24 @@
+name: Verify PROOFBENCH pilot safety
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/launch_proofbench_pilot.py'
+      - 'tests/test_pilot_safety.py'
+      - '.github/workflows/verify-proofbench.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Python syntax
+        run: python3 -m py_compile scripts/launch_proofbench_pilot.py
+      - name: Run budget and approval-gate unit tests (offline, no API key)
+        run: python3 -m unittest discover -s tests -v
