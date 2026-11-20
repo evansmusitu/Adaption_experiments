@@ -108,6 +108,13 @@ class ProofbenchContractTests(unittest.TestCase):
         preds[target]["value"] = "NaN"
         self.assertLess(score_predictions(rows, preds)["accuracy"], 1)
 
+    def test_clarification_units_are_not_interchangeable(self):
+        rows = make_cases("dev", pairs_per_family=1)
+        preds = predictions_from_gold(rows)
+        target = next(i for i, row in enumerate(rows) if row["gold"]["kind"] == "clarify")
+        preds[target]["unit"] = "units" if rows[target]["gold"]["unit"] == "USD" else "USD"
+        self.assertEqual(score_predictions(rows, preds)["correct"], len(rows) - 1)
+
     def test_numeric_units_are_not_interchangeable(self):
         rows = make_cases("dev", pairs_per_family=1)
         preds = predictions_from_gold(rows)
