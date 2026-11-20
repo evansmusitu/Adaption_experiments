@@ -1,0 +1,32 @@
+name: Import PROOFBENCH 240-row training data to Adaption (manual only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      approval:
+        description: 'Type exactly: APPROVE PROOFBENCH DATA UPLOAD'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proofbench-adaption-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    if: github.ref == 'refs/heads/main'
+    environment: proofbench-adaption-import
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Adaption official Python SDK
+        run: python3 -m pip install --disable-pip-version-check adaption
+      - name: Verify bundle, then upload only with explicit approval
+        env:
+          ADAPTION_API_KEY: ${{ secrets.ADAPTION_API_KEY }}
+          PROOFBENCH_UPLOAD_APPROVAL: ${{ inputs.approval }}
+        run: python3 -m proofbench.adaption_bridge
