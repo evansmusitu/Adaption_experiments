@@ -95,7 +95,7 @@ def get_json(path: str, key: str) -> dict:
 
 def prompt_from_row(row: dict) -> str:
     # Use instruction-like fields only; avoid echoing chat transcripts.
-    for field in ("original_prompt", "prompt", "instruction", "question", "input", "text"):
+    for field in ("enhanced_prompt", "original_prompt", "prompt", "instruction", "question", "input", "text"):
         value = row.get(field)
         if isinstance(value, str):
             return value[:6000]
