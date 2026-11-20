@@ -1,0 +1,27 @@
+name: Existing dataset 100-row adaptation quote (estimate only)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/adaption-quote-existing.yml'
+      - 'scripts/quote_existing_dataset.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: adaption-existing-quote
+  cancel-in-progress: true
+
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Quote existing Adaption dataset without launching jobs
+        env:
+          ADAPTION_API_KEY: ${{ secrets.ADAPTION_API_KEY }}
+        run: python3 -B scripts/quote_existing_dataset.py
