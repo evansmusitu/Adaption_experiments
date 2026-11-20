@@ -55,10 +55,12 @@ def _adaption_sdk_upload(filename: str, token: str) -> str:
     # Imported only AFTER explicit approval and integrity checks.
     from adaption import Adaption
     client = Adaption(api_key=token)
+    # "raw" is for training as-is and bypasses Adaptive Data.
+    # "adapt" imports the original rows for a later, separately approved run.
+    # The upload call itself never invokes datasets.adapt or AutoScientist.
     result = client.datasets.upload_file(
         filename,
-        processing_mode="raw",
-        column_mapping={"prompt": "prompt", "completion": "completion"},
+        processing_mode="adapt",
     )
     dataset_id = getattr(result, "dataset_id", None)
     if not isinstance(dataset_id, str) or not dataset_id:
