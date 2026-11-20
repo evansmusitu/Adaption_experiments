@@ -15,7 +15,7 @@ This repository is an isolated public hackathon workspace. Its primary research 
 | Original, deterministic synthetic training data | Built by `proofbench.benchmark` | 240 prompt/completion examples |
 | Separate adversarial development set | Built | 120 cases (60 paired scenarios) |
 | Stress test set | Built | 96 cases (48 paired scenarios) |
-| Leakage and mathematical sanity tests | CI-verified | Offline tests |
+| Leakage and mathematical sanity tests | CI-verified | Offline tests |\n| Independent re-parsing of generated answers | CI-verified | 456 synthetic answer keys audited |\n| Cross-dataset overlap | Read-only Adaption audit succeeded | 3,500 unique normalized prompts, 0 exact overlaps |\n| Interactive offline demo | Built | [Open demo source](demo/index.html) |\n| 100-row PROOFBENCH adaptation cost estimator | Prepared, not yet run on imported dataset | Manual GitHub Actions quote |
 | Counterfactual strict-pair scoring | Built and tested | `score_predictions` |
 | Paired comparison with grouped bootstrap + exact McNemar | Built and tested | `proofbench.comparison` |
 | Secure Adaption upload | Manual-only workflow prepared | Not launched |
@@ -43,7 +43,7 @@ Python 3.10+, **no API key, network, GPU or paid credits required**:
 ```bash
 python3 -m unittest discover -s tests -p 'test_proofbench_contract.py' -v
 python3 -m unittest discover -s tests -p 'test_comparison.py' -v
-python3 -m unittest discover -s tests -p 'test_adaption_bridge.py' -v
+python3 -m unittest discover -s tests -p 'test_adaption_bridge.py' -v\npython3 -m unittest discover -s tests -p 'test_independent_audit.py' -v\npython3 -m unittest discover -s tests -p 'test_adaption_estimate.py' -v\npython3 -m unittest discover -s tests -p 'test_overlap.py' -v
 python3 -m proofbench.benchmark --output generated
 ```
 
@@ -79,9 +79,9 @@ GitHub Actions has successfully authenticated to Adaption via the `ADAPTION_API_
 
 The **manual-only** workflow `.github/workflows/proofbench-upload.yml` prepares an authenticated dataset upload from `generated/train.jsonl`. It requires the exact input `APPROVE PROOFBENCH DATA UPLOAD`, executes only on `main`, and has no adaptation/training calls. The upload changes the Adaption account; **do not repeat it after an uncertain outcome**. It is not a substitute for the separate credit-approved adaptation workflow.
 
-The pre-existing `adaption-launch-proofbench.yml` is a different credit-consuming Invent experiment. Do **not** launch it assuming it adapts this training file; Invent and Adapt are distinct Adaption workflows.
+The estimate-only workflow `.github/workflows/proofbench-estimate.yml` is manually dispatched with the new PROOFBENCH dataset UUID. It validates a 100-row pilot quote and cannot launch adaptation. The raw import explicitly sets `processing_mode="raw"`, preserving a control dataset; whether this already-processed dataset can be used as an adaptation source must be verified through the quote before deciding if a second, adaptation-ready import is necessary.\n\nThe pre-existing `adaption-launch-proofbench.yml` is a different credit-consuming Invent experiment. Do **not** launch it assuming it adapts this training file; Invent and Adapt are distinct Adaption workflows.
 
-## Research quality limitations
+## Demonstration and cross-dataset audit\n\nThe mobile-friendly [offline interactive demo](demo/index.html) presents six real fixtures from the deterministic generator. It does **not** claim model improvement or show fake baseline results.\n\nThe authenticated overlap audit inspected 500 + 1,000 + 2,000 existing Invent rows, finding 3,500 unique normalized prompts, zero exact normalized duplicates within any dataset, and zero exact shared prompts between datasets. This is a strict text-level result only; it does **not** rule out paraphrase or numeric-template repetition. See the authenticated GitHub Actions run #44738341995.\n\n## Research quality limitations
 
 - Data are programmatically synthetic, fictional and not human-reviewed.
 - Split groups and lexical templates differ, but all families share generative mechanisms; this is **not a true blinded out-of-distribution benchmark**.
@@ -102,4 +102,4 @@ Follow [the research protocol](docs/PROOFBENCH_PROTOCOL.md) and [submission evid
 - [Adaption evaluation guide](https://docs.adaptionlabs.ai/adaptive-data/evaluate-dataset-quality)
 - [Hackyard submission rules](https://hackyard.org/events/adaption-labs/submit)
 
-**License:** Source code MIT-style licensing to be finalized separately; generated synthetic rows are marked CC0-1.0 for research. Do not assume provider-generated rows are covered by this release's provenance declaration.
+**Licence notice:** Generated deterministic synthetic rows are marked CC0-1.0 in their manifest. The source-code licence has not yet been selected; publication here is not a blanket permission to reuse private MUSITU AXIOM code. Do not assume provider-generated rows are covered by this release's provenance declaration.
