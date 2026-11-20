@@ -53,14 +53,25 @@ jobs:
         if: success()
         run: |
           mkdir -p release/dataset
-          cp -r proofbench tests docs demo evidence release/
+          cp -r proofbench scripts tests docs demo evidence release/
           cp README.md release/README.md
           cp generated/*.jsonl generated/manifest.json release/dataset/
           printf '%s\n' 'This package is a pre-submission prototype. Provider adaptation and model performance are not yet established.' > release/STATUS.txt
           test -f release/demo/index.html
           test -f release/proofbench/benchmark.py
           test -f release/dataset/train.jsonl
-          python3 -m compileall -q release/proofbench
+          python3 -m compileall -q release/proofbench release/scripts
+          (cd release && PYTHONPATH=. python3 -m unittest discover -s tests -v)
+          (cd release && python3 - <<'PY'
+          import json, hashlib, zipfile
+          from pathlib import Path
+          manifest = json.loads(Path('dataset/manifest.json').read_text())
+          for filename, expected in manifest['sha256'].items():
+              data = (Path('dataset')/filename).read_bytes()
+              assert hashlib.sha256(data).hexdigest() == expected
+          print('Released dataset SHA-256 files match all manifest hashes')
+          PY
+          )
       - name: Upload complete offline engineering bundle
         if: success()
         uses: actions/upload-artifact@v4
