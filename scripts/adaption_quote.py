@@ -15,7 +15,7 @@ import urllib.error
 import urllib.request
 
 HOST = "https://api.prod.adaptionlabs.ai"
-DATASET_ID = "b17502e7-d482-4a5d-bae0-a9ea55b7bfe1"
+DATASET_ID = "5ef42194-6814-45fb-8841-8116482928fa"
 PILOT_ROWS = 100
 
 
@@ -26,6 +26,7 @@ def main() -> int:
         return 2
     payload = {
         "estimate": True,
+        "column_mapping": {"prompt": "enhanced_prompt", "completion": "enhanced_completion"},
         "job_specification": {"max_rows": PILOT_ROWS},
     }
     request = urllib.request.Request(
@@ -70,7 +71,7 @@ def main() -> int:
         print("Estimate response lacks valid credit/time figures")
         return 1
     print("CONFIRMED: Adaption returned estimate=true; no run ID.")
-    print(f"Pilot size: {PILOT_ROWS} rows from existing 1,000-row dataset.")
+    print(f"Pilot size: {PILOT_ROWS} rows from existing 2,000-row dataset.")
     print(f"Estimated credits: {credits:g}")
     print(f"Estimated minutes: {minutes:g}")
     print("Multimodal pricing applied:", result.get("multimodalPricingApplied") is True)
