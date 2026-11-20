@@ -63,11 +63,14 @@ jobs:
         run: |
           mkdir -p release/dataset
           cp -r proofbench scripts tests docs demo evidence release/
+          mkdir -p release/.github
+          cp -r .github/workflows release/.github/
           cp README.md release/README.md
           cp generated/*.jsonl generated/manifest.json release/dataset/
           printf '%s\n' 'This package is a pre-submission prototype. Provider adaptation and model performance are not yet established.' > release/STATUS.txt
           test -f release/demo/index.html
           test -f release/proofbench/benchmark.py
+          test -f release/.github/workflows/proofbench-adaption-launch.yml
           test -f release/dataset/train.jsonl
           python3 -m compileall -q release/proofbench release/scripts
           (cd release && PYTHONPATH=. python3 -m unittest discover -s tests -v)
@@ -87,6 +90,7 @@ jobs:
         with:
           name: proofbench-research-bundle
           path: release/
+          include-hidden-files: true
           retention-days: 14
       - name: Upload synthetic data outputs
         if: success()
