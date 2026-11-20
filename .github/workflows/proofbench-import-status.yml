@@ -1,0 +1,31 @@
+name: Verify PROOFBENCH import status (read-only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset_id:
+        description: 'Dataset UUID shown by the PROOFBENCH upload workflow'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proofbench-import-status
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Adaption SDK
+        run: python3 -m pip install --disable-pip-version-check 'adaption>=0.7.0'
+      - name: Check 240 original rows and awaiting-input state
+        env:
+          ADAPTION_API_KEY: ${{ secrets.ADAPTION_API_KEY }}
+          PROOFBENCH_DATASET_ID: ${{ inputs.dataset_id }}
+        run: python3 -m proofbench.adaption_status

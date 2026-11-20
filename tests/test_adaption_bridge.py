@@ -53,27 +53,28 @@ class AdaptionBridgeTests(unittest.TestCase):
                         api_key="", uploader=fake)
         fake.assert_not_called()
 
-    def test_sdk_upload_preserves_original_data_in_raw_mode(self):
-        """Default processing must never implicitly invoke Adaptive Data."""
+    def test_sdk_upload_creates_adaptation_ready_source_without_launch(self):
+        """Import should be adaptation-ready, but must not start a paid run."""
         import sys
         from types import SimpleNamespace
         from unittest.mock import patch
         from proofbench.adaption_bridge import _adaption_sdk_upload
 
         dataset_client = Mock()
-        dataset_client.upload_file.return_value = SimpleNamespace(dataset_id="raw-control-id")
+        dataset_client.upload_file.return_value = SimpleNamespace(dataset_id="adapt-source-test-id")
         fake_client = Mock()
         fake_client.datasets = dataset_client
         fake_adaption = SimpleNamespace(Adaption=Mock(return_value=fake_client))
         with patch.dict(sys.modules, {"adaption": fake_adaption}):
             dataset_id = _adaption_sdk_upload("train.jsonl", "secret-for-tests")
-        self.assertEqual(dataset_id, "raw-control-id")
+        self.assertEqual(dataset_id, "adapt-source-test-id")
         fake_adaption.Adaption.assert_called_once_with(api_key="secret-for-tests")
         dataset_client.upload_file.assert_called_once_with(
             "train.jsonl",
-            processing_mode="raw",
-            column_mapping={"prompt": "prompt", "completion": "completion"},
+            processing_mode="adapt",
         )
+        dataset_client.adapt.assert_not_called()
+        fake_client.autoscientist.create.assert_not_called()
 
     def test_success_calls_provider_once_on_verified_file(self):
         fake = Mock(return_value="verified-dataset-id")
