@@ -1,0 +1,28 @@
+name: PROOFBENCH deterministic evaluation tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'evaluation/proofbench_dev.py'
+      - '.github/workflows/proofbench-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Check Python syntax
+        run: python3 -m py_compile evaluation/proofbench_dev.py
+      - name: Verify oracle and scoring regression tests
+        run: python3 -B evaluation/proofbench_dev.py --self-test
+      - name: Generate development cases and count rows
+        run: |
+          python3 -B evaluation/proofbench_dev.py --write /tmp/proofbench_dev.jsonl
+          test "$(wc -l </tmp/proofbench_dev.jsonl)" -eq 100
