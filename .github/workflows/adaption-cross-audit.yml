@@ -1,0 +1,31 @@
+name: Adaption cross-dataset overlap audit (GET only)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feature/proofbench-verifiable-eval-20261120
+    paths:
+      - 'scripts/adaption_cross_audit.py'
+      - 'proofbench/overlap.py'
+      - '.github/workflows/adaption-cross-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: adaption-cross-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read existing datasets and print aggregate-only overlap
+        env:
+          PYTHONPATH: .
+          ADAPTION_API_KEY: ${{ secrets.ADAPTION_API_KEY }}
+        run: python3 -B scripts/adaption_cross_audit.py

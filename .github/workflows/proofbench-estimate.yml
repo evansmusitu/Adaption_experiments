@@ -1,0 +1,31 @@
+name: Quote PROOFBENCH adaptation (NO credit spend)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset_id:
+        description: 'New PROOFBENCH dataset UUID returned by the manual import'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proofbench-estimate-only
+  cancel-in-progress: false
+
+jobs:
+  estimate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Adaption official SDK
+        run: python3 -m pip install --disable-pip-version-check adaption
+      - name: Validate new dataset ID and request estimate only
+        env:
+          ADAPTION_API_KEY: ${{ secrets.ADAPTION_API_KEY }}
+          PROOFBENCH_DATASET_ID: ${{ inputs.dataset_id }}
+        run: python3 -m proofbench.adaption_estimate

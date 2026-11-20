@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MUSITU PROOFBENCH — Counterfactual Financial AI Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#151f32;--edge:#304059;--text:#e9f4ff;--muted:#b8c7d9;--accent:#5fe0bd}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% -5%,#183851,transparent 53%),var(--bg);color:var(--text);font:16px/1.55 system-ui,sans-serif;padding:20px}
+main{max-width:950px;margin:0 auto}header{padding:28px 0}.eyebrow{color:var(--accent);letter-spacing:2px;font-size:.76rem;font-weight:750}h1{font-size:clamp(2rem,6vw,3.5rem);line-height:1.1;margin:12px 0}h1 span{color:var(--accent)}
+h2{font-size:1.2rem}p{color:var(--muted)}.panel{border:1px solid var(--edge);background:var(--panel);border-radius:20px;padding:22px;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{border:1px solid var(--edge);border-radius:14px;padding:15px;background:#101c2c}.stat b{display:block;font-size:1.7rem}.stat small{color:var(--muted)}
+label{display:block;color:var(--muted);margin-bottom:8px}select,button{padding:12px;border:1px solid var(--edge);border-radius:10px;background:#0b1626;color:var(--text);font:inherit;min-height:45px}
+select{width:100%}button{cursor:pointer}button[aria-pressed=true],button.primary{background:var(--accent);color:#07251e;font-weight:bold}
+button:focus-visible,select:focus-visible{outline:3px solid var(--accent)}.actions{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+pre{white-space:pre-wrap;word-break:break-word;background:#0b1729;border:1px solid var(--edge);padding:18px;border-radius:12px;min-height:135px;font:inherit}
+.answer{background:#11322f;padding:14px;border-left:3px solid var(--accent);border-radius:9px;white-space:pre-wrap}
+.hidden{display:none}.fine{font-size:.87rem}footer{padding:25px 0;text-align:center;color:var(--muted)}a{color:var(--accent)}
+@media(max-width:500px){.grid{gap:7px}.stat{padding:10px}.stat b{font-size:1.25rem}.panel{padding:16px}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">MUSITU · ADVERSARIAL RESEARCH DEMO</div>
+<h1>When one fact changes,<br><span>the correct answer must change.</span></h1>
+<p>Six financial scenarios, twelve paired examples. Explore how missing information, duplicate receipts, currency assumptions and fee rules change the mathematically justified response.</p></header>
+<div class="grid" aria-label="Research status">
+ <div class="stat"><b>6</b><small>scenario families</small></div>
+ <div class="stat"><b>12</b><small>interactive examples</small></div>
+ <div class="stat"><b>0</b><small>claimed model scores</small></div>
+</div>
+<section class="panel">
+<h2>Explore a counterfactual pair</h2>
+<label for="family">Select scenario</label><select id="family"></select>
+<div class="actions"><button id="variantA" aria-pressed="true">Variant A</button><button id="variantB" aria-pressed="false">Variant B</button></div>
+<div id="descriptor" class="fine" aria-live="polite"></div>
+<pre id="question"></pre>
+<div class="actions"><button id="reveal" class="primary">Reveal oracle answer</button><button id="copy">Copy question</button></div>
+<div id="answer" class="answer hidden" aria-live="polite"></div>
+</section>
+<section class="panel"><h2>What this demonstration actually proves</h2>
+<p>These are fictional, hand-picked fixtures drawn from our deterministic research generator. The answers are arithmetic oracle outputs, not responses from an AI model. They demonstrate why counterfactual testing matters.</p>
+<p><strong>Not yet established:</strong> actual model accuracy, independent human review, or improvement caused by Adaption. Real Adaption run identifiers, exported before/after datasets and measured evaluations must be added before final submission.</p>
+<p class="fine">No API key, cookies, network services, user data, purchase or account login is required. The demo runs offline.</p></section>
+<footer>MUSITU PROOFBENCH · <a href="https://github.com/evansmusitu/Adaption_experiments">Research repository</a> · 2026</footer>
+</main>
+<script>
+"use strict";
+const cases=[
+{title:"Missing exchange rate",q:"A shop received ZiG 6387. Convert this to USD to two decimal places.",a:{rule:"Use a hypothetical rate of 31.08 ZiG per USD.",answer:"205.50 USD — Divide ZiG 6387 by 31.08."},b:{rule:"No exchange rate, date, or source is available.",answer:"Insufficient information — request a dated, sourced ZiG/USD rate."}},
+{title:"Impossible inventory",q:"Opening stock is 27 units and deliveries add 19. How much stock remains?",a:{rule:"25 units were sold.",answer:"21 units — 27 + 19 − 25."},b:{rule:"66 units were recorded as sold.",answer:"Inconsistent records — reconcile stock movements before stating remaining inventory."}},
+{title:"Duplicate receipt ID",q:"Opening cash is USD 945, two entries are USD 84 each, and one payment is USD 20. Determine closing cash.",a:{rule:"The receipt entries have distinct IDs R1 and R2.",answer:"1093.00 USD — 945 + 84 + 84 − 20."},b:{rule:"Both receipt entries have the same ID R1.",answer:"1009.00 USD — count a duplicated receipt once."}},
+{title:"Interest compounding",q:"A USD 1483 deposit earns 8% annually for exactly two years, with no fees. Calculate final balance.",a:{rule:"Apply SIMPLE interest.",answer:"1720.28 USD — 1483 × (1 + 0.08 × 2)."},b:{rule:"Apply ANNUAL COMPOUND interest.",answer:"1729.77 USD — 1483 × 1.08²."}},
+{title:"Missing business cost",q:"A trader sells 22 units at USD 8.25 each; each cost USD 3.21. Calculate profit after delivery.",a:{rule:"Total delivery cost was USD 20.15.",answer:"90.73 USD — 22 × (8.25 − 3.21) − 20.15."},b:{rule:"Delivery cost is unknown.",answer:"Insufficient information — ask for the delivery cost."}},
+{title:"Per-item versus flat fee",q:"A kiosk sells 14 items at USD 22.29 each. A processing fee of USD 1.06 applies. Find net sales cash.",a:{rule:"The fee is charged for EACH item.",answer:"297.22 USD — 14 × (22.29 − 1.06)."},b:{rule:"The fee is ONE flat transaction charge.",answer:"311.00 USD — 14 × 22.29 − 1.06."}}
+];
+const $=id=>document.getElementById(id);let index=0,variant="a";
+cases.forEach((c,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=c.title;$("family").appendChild(o)});
+function draw(){const c=cases[index],v=c[variant];$("descriptor").textContent="Scenario "+(index+1)+" of 6 · "+variant.toUpperCase();$("question").textContent=c.q+"\n\nCondition: "+v.rule;$("answer").textContent=v.answer;$("answer").classList.add("hidden");$("reveal").textContent="Reveal oracle answer";$("variantA").setAttribute("aria-pressed",String(variant==="a"));$("variantB").setAttribute("aria-pressed",String(variant==="b"));}
+$("family").addEventListener("change",e=>{index=Number(e.target.value);variant="a";draw()});
+$("variantA").onclick=()=>{variant="a";draw()};$("variantB").onclick=()=>{variant="b";draw()};
+$("reveal").onclick=()=>{const hidden=$("answer").classList.toggle("hidden");$("reveal").textContent=hidden?"Reveal oracle answer":"Hide oracle answer"};
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("question").textContent);$("copy").textContent="Copied"}catch{$("copy").textContent="Select question to copy"}};
+draw();
+</script></body></html>

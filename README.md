@@ -1,69 +1,105 @@
-# MUSITU PROOFBENCH — Verifiable AI for Quantitative Business Decisions
+# MUSITU PROOFBENCH — Verified Financial Reasoning Data
 
-**Adaption AI Dataset Challenge · 2026**  
-**Status:** Experimental infrastructure and reproducible development evaluator implemented. **No trained-model improvement or hackathon submission claimed.**
+**Adaption Dataset Challenge • November 20–December 6, 2026**
 
-## Research question
+This repository is an isolated public hackathon workspace. Its primary research question is:
 
-Can training-data adaptation plus independent numerical verification improve model accuracy and appropriate abstention on small-business financial problems, versus synthetic data quality improvements alone?
+> Can targeted, mathematically verifiable, counterfactual financial examples improve AI answer reliability and appropriate abstention more than synthetic data expansion alone?
 
-The target applications include realistic Zimbabwean business finance, cash-flow questions, inventory reconciliation, missing currency conversion rates, duplicate receipts and numerical optimization. We use synthetic data and never infer live foreign-exchange rates.
+**Status:** This is an engineered dataset and evaluation harness, **not yet a validated performance improvement**. No external model predictions or trained models are included. Do not interpret any test-suite 100% correctness as model accuracy.
 
-## Evidence collected remotely
+## What exists and what it proves
 
-GitHub Actions uses the official Adaption API with `ADAPTION_API_KEY` stored in GitHub Actions Secrets. Individual proprietary data rows and raw API responses are **not** logged.
+| Component | Status | Evidence |
+|---|---|---|
+| Original, deterministic synthetic training data | Built by `proofbench.benchmark` | 240 prompt/completion examples |
+| Separate adversarial development set | Built | 120 cases (60 paired scenarios) |
+| Stress test set | Built | 96 cases (48 paired scenarios) |
+| Leakage and mathematical sanity tests | CI-verified | Offline tests |\n| Independent re-parsing of generated answers | CI-verified | 456 synthetic answer keys audited |\n| Cross-dataset overlap | Read-only Adaption audit succeeded | 3,500 unique normalized prompts, 0 exact overlaps |\n| Interactive offline demo | Built | [Open demo source](demo/index.html) |\n| 100-row PROOFBENCH adaptation cost estimator | Prepared, not yet run on imported dataset | Manual GitHub Actions quote |
+| Counterfactual strict-pair scoring | Built and tested | `score_predictions` |
+| Paired comparison with grouped bootstrap + exact McNemar | Built and tested | `proofbench.comparison` |
+| Secure Adaption upload | Manual-only workflow prepared | Not launched |
+| Adaption generated-data workspace | Existing read-only API audits | 3 existing invented datasets; 3,500 rows total |
+| PROOFBENCH dataset adapted on Adaption | **Not yet** | Requires import, quote and approval |
+| Genuine model before/after experiment | **Not yet** | Requires baseline/candidate predictions |
+| Human-reviewed independent blind holdout | **Not yet** | Must be collected separately |
+| Hackathon submission | **Not yet** | Close Dec 6, 11:59 PM IST |
 
-| Adaption dataset | Origin | Rows | Native score before → after | Native improvement |
-| --- | --- | ---: | ---: | ---: |
-| #1 | Invented | 500 | 9.0 → 9.2 | 2.2% |
-| #2 | Invented | 1,000 | 9.0 → 9.4 | 4.4% |
-| #3 | Invented | 2,000 | 9.0 → 9.3 | 3.3% |
+### Six scenario families
 
-These are **Adaption dataset quality metrics, not model accuracy**. All three exported prompt sets were inspected in memory for narrow lexical topic coverage and exact duplicates. Results and limitations: [research protocol](docs/experiment_protocol.md).
+- FX conversion: supplied rate versus missing, dated conversion rate.
+- Inventory: feasible stock counts versus impossible negative inventory.
+- Receipts: two unique transactions versus a duplicated receipt ID.
+- Interest: simple interest versus annual compounding.
+- Profit: known delivery overhead versus missing overhead.
+- Processing fees: per-item fee versus single flat fee.
 
-## Reproducible development evaluation
+Every scenario has two counterfactual variants, with independently computed decimal/integer oracles. Changing a single decisive condition changes the correct answer or whether an exact answer is justified.
 
-The public benchmark generator is deterministic and uses Python's `Decimal` arithmetic. It covers 100 development examples across five task families: profit, missing FX rate, explicit FX rate, duplicate receipts, and simple interest. Twenty missing/present exchange-rate pairs are tested for paired correctness.
+## Reproduce locally
 
-Run locally:
+Python 3.10+, **no API key, network, GPU or paid credits required**:
 
 ```bash
-python3 evaluation/proofbench_dev.py --self-test
-python3 evaluation/proofbench_dev.py --write data/dev_cases.jsonl
-python3 evaluation/proofbench_dev.py --predictions model_predictions.jsonl
+python3 -m unittest discover -s tests -p 'test_proofbench_contract.py' -v
+python3 -m unittest discover -s tests -p 'test_comparison.py' -v
+python3 -m unittest discover -s tests -p 'test_adaption_bridge.py' -v\npython3 -m unittest discover -s tests -p 'test_independent_audit.py' -v\npython3 -m unittest discover -s tests -p 'test_adaption_estimate.py' -v\npython3 -m unittest discover -s tests -p 'test_overlap.py' -v
+python3 -m proofbench.benchmark --output generated
 ```
 
-Prediction JSONL records require an `id`, numeric `prediction_value` (or `null`), and `needs_clarification` boolean. The scorer requires exactly one prediction per case and reports exact numerical correctness (within USD 0.01), missing-input precision/recall and both-correct counterfactual pairs.
+Outputs are `generated/train.jsonl`, `dev.jsonl`, `stress.jsonl` and `manifest.json` with SHA-256 checksums. The training export contains **only** prompt/completion columns. The other files retain test-case metadata and gold answers. CI also packages these as an artifact. Do not train on development/stress gold answers.
 
-**This benchmark is template-generated and is for development only.** A true blind, independently phrased benchmark must be held back before generalization claims. An oracle self-test is not a model evaluation.
+### Score an external model
 
-## Remote control
+Have a baseline or adapted model generate **structured predictions** as JSONL:
 
-- `.github/workflows/adaption-audit.yml`: authenticated GET-only listing, metadata, export-header check and official evaluation metrics.
-- `.github/workflows/adaption-profile.yml`: in-memory analysis of three approved datasets with aggregate-only output.
-- `.github/workflows/adaption-estimate.yml`: official Invent `estimate=true` request for a hypothetical 100-row dataset, with **no generation or credit charge**.
-- `.github/workflows/proofbench-tests.yml`: syntax checks and scorer/generator regression verification, no Adaption key required.
+```json
+{"id":"dev-fx_missing-0000-a","kind":"numeric","value":"12.50","unit":"USD"}
+{"id":"dev-fx_missing-0000-b","kind":"clarify","value":null,"unit":"USD"}
+```
 
-**Verified quote:** a new 100-row Invent pilot would require 10 promotional credits; account credits cover this amount. No new dataset has been created from that quote. Cost estimates for re-adapting already invented datasets failed HTTP 400; do not launch that pathway until its preconditions have been investigated.
+The example values above are only FORMAT EXAMPLES; use the actual case IDs and model predictions.
 
-## Next research gates
+```bash
+python3 -m proofbench.benchmark \
+  --cases generated/dev.jsonl --predictions baseline.jsonl
 
-1. Human review and validate a sample of the 2,000-row candidate's mathematical ground truth; compare against the 1,000-row candidate.
-2. Create a sealed, human-authored blind evaluation set with disjoint scenarios.
-3. Identify or import a valid source dataset for an Adaption transformation; request an exact estimate before processing.
-4. Compare baseline, Adaption-only, and verification-filtered arms under the same model/training/evaluation conditions.
-5. Publish the data card, license, honest ablation results, and a three-minute demonstration.
+python3 -m proofbench.comparison \
+  --cases generated/dev.jsonl \
+  --baseline baseline.jsonl \
+  --candidate adapted.jsonl \
+  --output comparison.json
+```
 
-## Security and reproducibility
+The evaluator enforces full correct pairs, numeric units, precision and abstention. `comparison.py` computes paired-group bootstrap uncertainty and an exact McNemar p-value at the pair level. It **never generates fake model scores**.
 
-Public repository: **never commit API keys, customer financial records, private AXIOM source, confidential prompts, or blind benchmark answers.** Adaption API keys belong in the `ADAPTION_API_KEY` repository secret, only for trusted workflows. Credit-consuming launches require their own guarded workflow and an approved limit.
+## Adaption integration and credit safety
 
-## Verified workflow records
+GitHub Actions has successfully authenticated to Adaption via the `ADAPTION_API_KEY` secret, checked the three existing invented datasets, and retrieved native evaluation summaries.
 
-- [Adaption authentication and dataset inventory](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44697656462)
-- [Native Adaption quality scores](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44709740361)
-- [Corrected aggregate domain profile](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44710607185)
-- [Official 100-row, estimate-only credit quote](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44711086080)
-- [PROOFBENCH benchmark tests](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44711695445)
+The **manual-only** workflow `.github/workflows/proofbench-upload.yml` prepares an authenticated dataset upload from `generated/train.jsonl`. It requires the exact input `APPROVE PROOFBENCH DATA UPLOAD`, executes only on `main`, and has no adaptation/training calls. The upload changes the Adaption account; **do not repeat it after an uncertain outcome**. It is not a substitute for the separate credit-approved adaptation workflow.
 
-Official API docs: https://docs.adaptionlabs.ai/
+The estimate-only workflow `.github/workflows/proofbench-estimate.yml` is manually dispatched with the new PROOFBENCH dataset UUID. It validates a 100-row pilot quote and cannot launch adaptation. The raw import explicitly sets `processing_mode="raw"`, preserving a control dataset; whether this already-processed dataset can be used as an adaptation source must be verified through the quote before deciding if a second, adaptation-ready import is necessary.\n\nThe pre-existing `adaption-launch-proofbench.yml` is a different credit-consuming Invent experiment. Do **not** launch it assuming it adapts this training file; Invent and Adapt are distinct Adaption workflows.
+
+## Demonstration and cross-dataset audit\n\nThe mobile-friendly [offline interactive demo](demo/index.html) presents six real fixtures from the deterministic generator. It does **not** claim model improvement or show fake baseline results.\n\nThe authenticated overlap audit inspected 500 + 1,000 + 2,000 existing Invent rows, finding 3,500 unique normalized prompts, zero exact normalized duplicates within any dataset, and zero exact shared prompts between datasets. This is a strict text-level result only; it does **not** rule out paraphrase or numeric-template repetition. See the authenticated GitHub Actions run #44738341995.\n\n## Research quality limitations
+
+- Data are programmatically synthetic, fictional and not human-reviewed.
+- Split groups and lexical templates differ, but all families share generative mechanisms; this is **not a true blinded out-of-distribution benchmark**.
+- Exact Oracle scoring measures structured predictions supplied by real models only; no model improvement has been measured yet.
+- An Adaption dataset-quality score is not model accuracy.
+- A third-party manual review and withheld evaluation set are required before claims of real-world reliability.
+- No investment, regulatory or accounting advice should be inferred from these research fixtures.
+- No private AXIOM repositories or customer records are copied into this project.
+
+## Before submitting to Hackyard
+
+Follow [the research protocol](docs/PROOFBENCH_PROTOCOL.md) and [submission evidence checklist](docs/HACKATHON_SUBMISSION.md). The challenge requests source and improved datasets, before/after evaluation evidence, a README, license/provenance, and a demo. Submit to only one approved platform by December 6, 2026 at 11:59 PM IST.
+
+### Documentation
+
+- [Adaption Adaptive Data](https://docs.adaptionlabs.ai/adaptive-data/overview)
+- [Adaption upload guide](https://docs.adaptionlabs.ai/adaptive-data/create-a-dataset)
+- [Adaption evaluation guide](https://docs.adaptionlabs.ai/adaptive-data/evaluate-dataset-quality)
+- [Hackyard submission rules](https://hackyard.org/events/adaption-labs/submit)
+
+**Licence notice:** Generated deterministic synthetic rows are marked CC0-1.0 in their manifest. The source-code licence has not yet been selected; publication here is not a blanket permission to reuse private MUSITU AXIOM code. Do not assume provider-generated rows are covered by this release's provenance declaration.

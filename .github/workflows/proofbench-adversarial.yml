@@ -1,0 +1,88 @@
+name: PROOFBENCH paired adversarial tests
+
+on:
+  push:
+    branches: [main, feature/proofbench-verifiable-eval-20261120]
+    paths:
+      - 'proofbench/**'
+      - 'tests/test_proofbench_contract.py'
+      - 'tests/test_comparison.py'
+      - 'tests/test_adaption_bridge.py'
+      - 'tests/test_independent_audit.py'
+      - 'tests/test_adaption_estimate.py'
+      - 'tests/test_overlap.py'
+      - 'tests/test_submission_gate.py'
+      - '.github/workflows/proofbench-adversarial.yml'
+  pull_request:
+    paths:
+      - 'proofbench/**'
+      - 'tests/test_proofbench_contract.py'
+      - 'tests/test_comparison.py'
+      - 'tests/test_adaption_bridge.py'
+      - 'tests/test_independent_audit.py'
+      - 'tests/test_adaption_estimate.py'
+      - 'tests/test_overlap.py'
+      - 'tests/test_submission_gate.py'
+      - '.github/workflows/proofbench-adversarial.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Contract tests (offline, no API secrets)
+        env:
+          PYTHONPATH: .
+        run: |
+          python3 -m unittest discover -s tests -p 'test_proofbench_contract.py' -v
+          python3 -m unittest discover -s tests -p 'test_comparison.py' -v
+          python3 -m unittest discover -s tests -p 'test_adaption_bridge.py' -v
+          python3 -m unittest discover -s tests -p 'test_independent_audit.py' -v
+          python3 -m unittest discover -s tests -p 'test_adaption_estimate.py' -v
+          python3 -m unittest discover -s tests -p 'test_overlap.py' -v
+          python3 -m unittest discover -s tests -p 'test_submission_gate.py' -v
+      - name: Produce reproducible demonstration artifacts
+        if: success()
+        run: python3 -m proofbench.benchmark --output generated
+      - name: Package reproducible hackathon preview
+        if: success()
+        run: |
+          mkdir -p release/dataset
+          cp -r proofbench scripts tests docs demo evidence release/
+          cp README.md release/README.md
+          cp generated/*.jsonl generated/manifest.json release/dataset/
+          printf '%s\n' 'This package is a pre-submission prototype. Provider adaptation and model performance are not yet established.' > release/STATUS.txt
+          test -f release/demo/index.html
+          test -f release/proofbench/benchmark.py
+          test -f release/dataset/train.jsonl
+          python3 -m compileall -q release/proofbench release/scripts
+          (cd release && PYTHONPATH=. python3 -m unittest discover -s tests -v)
+          (cd release && python3 - <<'PY'
+          import json, hashlib, zipfile
+          from pathlib import Path
+          manifest = json.loads(Path('dataset/manifest.json').read_text())
+          for filename, expected in manifest['sha256'].items():
+              data = (Path('dataset')/filename).read_bytes()
+              assert hashlib.sha256(data).hexdigest() == expected
+          print('Released dataset SHA-256 files match all manifest hashes')
+          PY
+          )
+      - name: Upload complete offline engineering bundle
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofbench-research-bundle
+          path: release/
+          retention-days: 14
+      - name: Upload synthetic data outputs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofbench-adversarial-fixtures
+          path: generated/
+          retention-days: 10

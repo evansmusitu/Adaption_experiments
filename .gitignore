@@ -1,0 +1,20 @@
+# Generated training/evaluation artifacts; publish intentionally as release files
+/generated/
+*.pyc
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+
+# Never commit credentials, third-party customer data or local outputs
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.token
+private/
+secrets/
+logs/
