@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""No-charge, estimate-only Adaption pilot. Do NOT launch an adaptation.
+"""Estimate an original PROOFBENCH seed run without creating any dataset.
 
-Only one fixed, existing dataset is quoted. This sends estimate=true and never
-submits any request that could start a training/adaptation run. Some Adaption
-estimate requests can persist submitted column mappings/expansion settings; we
-intentionally submit neither to preserve the dataset's existing configuration.
+Uses the documented Invent estimate=true API. This workflow does NOT launch
+adaptations, training, dataset creation, or any other credit-consuming work.
+Never print raw errors or private billing balances into a public GitHub log.
 """
 from __future__ import annotations
 
@@ -14,68 +13,77 @@ import sys
 import urllib.error
 import urllib.request
 
-HOST = "https://api.prod.adaptionlabs.ai"
-DATASET_ID = "5ef42194-6814-45fb-8841-8116482928fa"
-PILOT_ROWS = 100
+ROWS = 100
+URL = "https://api.prod.adaptionlabs.ai/api/v1/datasets/invent"
+PROMPT = (
+    "Original instruction-response training examples about verifiable numerical "
+    "reasoning for Zimbabwean small-business scenarios. Cover cash-flow, inventory, "
+    "profit, duplicate payments, interest, accounting constraints, and missing "
+    "currency exchange rates. Require explicit numerical assumptions, correct "
+    "calculation, and abstention when essential inputs are missing. Use fictional "
+    "businesses and no private customer data."
+)
+
+
+def numeric(value):
+    if type(value) in (float, int) and 0 <= value <= 10_000_000:
+        return value
+    return None
 
 
 def main() -> int:
     token = os.environ.get("ADAPTION_API_KEY", "").strip()
     if not token:
-        print("ERROR: GitHub secret ADAPTION_API_KEY is absent")
+        print("ERROR: GitHub secret ADAPTION_API_KEY missing")
         return 2
     payload = {
+        "rows": ROWS,
+        "dataset_prompt": PROMPT,
+        "training_type": "instruction_dataset",
         "estimate": True,
-        "column_mapping": {"prompt": "enhanced_prompt", "completion": "enhanced_completion"},
-        "job_specification": {"max_rows": PILOT_ROWS},
     }
-    request = urllib.request.Request(
-        HOST + "/api/v1/datasets/" + DATASET_ID + "/adapt",
-        data=json.dumps(payload).encode("utf-8"),
-        method="POST",
-        headers={
+    req = urllib.request.Request(
+        URL, data=json.dumps(payload).encode(),
+        method="POST", headers={
             "Authorization": "Bearer " + token,
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "musitu-adaption-estimate-only/1.0",
+            "User-Agent": "musitu-estimate-only/2.0",
         },
     )
     try:
-        with urllib.request.urlopen(request, timeout=35) as response:
-            raw = response.read(100_001)
+        with urllib.request.urlopen(req, timeout=35) as response:
+            body = response.read(100001)
     except urllib.error.HTTPError as exc:
-        print(f"Adaption estimate request rejected: HTTP {exc.code}. No adaptation was requested.")
+        print(f"Adaption estimate failed with HTTP {exc.code}; no dataset creation requested.")
         return 1
     except (urllib.error.URLError, TimeoutError):
-        print("Adaption estimate network connection failed")
+        print("Adaption API network error during estimate")
         return 1
-    if len(raw) > 100_000:
-        print("Estimate response exceeded bounded limit")
+    if len(body) > 100000:
+        print("Estimate response unexpectedly large")
         return 1
     try:
-        result = json.loads(raw)
+        result = json.loads(body)
     except (ValueError, UnicodeDecodeError):
-        print("Estimate response was not valid JSON")
+        print("Estimate response invalid JSON")
         return 1
-    if not isinstance(result, dict):
-        print("Estimate response has invalid shape")
+    if not isinstance(result, dict) or result.get("dataset_id") or result.get("run_id"):
+        print("API did not provide a safe estimate-only response")
         return 1
-    if result.get("estimate") is not True or result.get("run_id"):
-        print("WARNING: API did not explicitly confirm estimate-only behavior")
+    credits = numeric(result.get("estimatedCredits", result.get("estimated_credits")))
+    available = numeric(result.get("availableCredits", result.get("available_credits")))
+    if credits is None:
+        print("Estimate request returned no recognized credit amount")
         return 1
-
-    credits = result.get("estimatedCreditsConsumed")
-    minutes = result.get("estimatedMinutes")
-    if (type(credits) not in (int, float) or credits < 0
-            or type(minutes) not in (int, float) or minutes < 0):
-        print("Estimate response lacks valid credit/time figures")
-        return 1
-    print("CONFIRMED: Adaption returned estimate=true; no run ID.")
-    print(f"Pilot size: {PILOT_ROWS} rows from existing 2,000-row dataset.")
-    print(f"Estimated credits: {credits:g}")
-    print(f"Estimated minutes: {minutes:g}")
-    print("Multimodal pricing applied:", result.get("multimodalPricingApplied") is True)
-    print("No adaptation or training job was started by this script.")
+    print("CONFIRMED: Invent estimate-only request returned successfully")
+    print(f"Proposed PROOFBENCH pilot rows: {ROWS}")
+    print(f"Estimated credits for new dataset: {credits:g}")
+    if available is not None:
+        print("Available promotional credits cover estimate:", available >= credits)
+    else:
+        print("Credit balance unavailable from estimate response")
+    print("NO DATASET CREATION OR TRAINING REQUESTED")
     return 0
 
 
