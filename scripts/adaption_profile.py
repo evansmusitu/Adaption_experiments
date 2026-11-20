@@ -15,7 +15,6 @@ import re
 import sys
 import urllib.error
 import urllib.request
-import uuid
 
 HOST = "https://api.prod.adaptionlabs.ai"
 PREFIX = "/api/v1/datasets/"
@@ -94,12 +93,43 @@ def get_json(path: str, key: str) -> dict:
     raise RuntimeError("Unexpected JSON response")
 
 def prompt_from_row(row: dict) -> str:
-    # Use instruction-like fields only; avoid echoing chat transcripts.
-    for field in ("enhanced_prompt", "original_prompt", "prompt", "instruction", "question", "input", "text"):
+    """Find primary instructions, else use bounded text across unknown schemas.
+
+    Invented datasets may export `enhanced_prompt` or nested content rather
+    than the uploaded-dataset `original_prompt` column. No text is ever logged.
+    """
+    primary = (
+        "original_prompt", "enhanced_prompt", "generated_prompt", "prompt",
+        "instruction", "question", "query", "input", "text",
+    )
+    for field in primary:
         value = row.get(field)
-        if isinstance(value, str):
+        if isinstance(value, str) and value.strip():
             return value[:6000]
-    return ""
+
+    # Fallback: compile readable text from arbitrary export schemas without
+    # exposing any individual row. Keep conversation depth and bytes bounded.
+    excluded = {
+        "id", "dataset_id", "row_id", "run_id", "source_dataset_id",
+        "created_at", "updated_at", "url", "source_url", "metadata",
+    }
+    parts = []
+    def collect(value, depth):
+        if depth > 2 or sum(map(len, parts)) >= 6000:
+            return
+        if isinstance(value, str) and len(value.strip()) >= 15:
+            parts.append(value[:2500])
+        elif isinstance(value, list):
+            for item in value[:8]:
+                collect(item, depth + 1)
+        elif isinstance(value, dict):
+            for key, item in list(value.items())[:15]:
+                if key not in excluded:
+                    collect(item, depth + 1)
+    for key, value in list(row.items())[:30]:
+        if key not in excluded:
+            collect(value, 0)
+    return " ".join(parts)[:6000]
 
 def aggregate_jsonl(raw: bytes) -> dict:
     counts = collections.Counter()
@@ -137,8 +167,8 @@ def aggregate_jsonl(raw: bytes) -> dict:
     return {
         "rows_checked": total,
         "unreadable_rows": counts["malformed"],
-        "prompts_missing_or_unmapped": missing,
-        "exact_duplicate_prompts": dupe,
+        "rows_without_extractable_text": missing,
+        "exact_duplicate_extracted_text": dupe,
         "average_prompt_length": round(lengths / max(1, total - missing)),
         "topic_heuristics": {key: counts[key] for key in CATEGORIES},
     }
