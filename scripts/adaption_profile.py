@@ -134,6 +134,7 @@ def prompt_from_row(row: dict) -> str:
 def aggregate_jsonl(raw: bytes) -> dict:
     counts = collections.Counter()
     hashes = set()
+    export_field_types = {}
     total = 0
     missing = 0
     dupe = 0
@@ -150,6 +151,11 @@ def aggregate_jsonl(raw: bytes) -> dict:
             counts["malformed"] += 1
             continue
         total += 1
+        if total == 1:
+            # Field names/types only; never emit row content or sample text.
+            for key, value in list(row.items())[:30]:
+                if re.fullmatch(r"[A-Za-z][A-Za-z_0-9]{0,40}", key):
+                    export_field_types[key] = type(value).__name__
         prompt = prompt_from_row(row)
         if not prompt.strip():
             missing += 1
@@ -166,6 +172,7 @@ def aggregate_jsonl(raw: bytes) -> dict:
                 counts[category] += 1
     return {
         "rows_checked": total,
+        "export_field_types": export_field_types,
         "unreadable_rows": counts["malformed"],
         "rows_without_extractable_text": missing,
         "exact_duplicate_extracted_text": dupe,
