@@ -55,7 +55,11 @@ def _adaption_sdk_upload(filename: str, token: str) -> str:
     # Imported only AFTER explicit approval and integrity checks.
     from adaption import Adaption
     client = Adaption(api_key=token)
-    result = client.datasets.upload_file(filename)
+    result = client.datasets.upload_file(
+        filename,
+        processing_mode="raw",
+        column_mapping={"prompt": "prompt", "completion": "completion"},
+    )
     dataset_id = getattr(result, "dataset_id", None)
     if not isinstance(dataset_id, str) or not dataset_id:
         raise RuntimeError("Adaption upload response was missing dataset_id")
