@@ -83,6 +83,17 @@ class CreditGuardTests(unittest.TestCase):
         self.assertEqual(launch.kwargs["job_specification"]["max_rows"], 100)
         self.assertIn(DATASET_ID, launch.kwargs["job_specification"]["idempotency_key"])
 
+    def test_preflight_quote_and_credit_gate_share_identical_recipe(self):
+        from proofbench.adaption_estimate import estimate
+        preflight_factory, preflight_client = sdk(9)
+        estimate(DATASET_ID, "key", client_factory=preflight_factory)
+        launch_factory, launch_client = sdk(9)
+        launch_pilot(DATASET_ID, "key", APPROVAL, "refs/heads/main", launch_factory)
+        self.assertEqual(
+            preflight_client.adapt.call_args_list[0].kwargs,
+            launch_client.adapt.call_args_list[0].kwargs,
+        )
+
     def test_malformed_id_refused_without_network(self):
         factory, datasets = sdk()
         with self.assertRaises(ValueError):
