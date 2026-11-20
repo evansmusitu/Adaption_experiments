@@ -12,7 +12,7 @@ This project separates **dataset import**, **cost quotation**, and **credit-cons
 - All main-branch CI checks pass.
 - Only the owner may authorize an upload or credit-consuming run.
 
-## Step 1 — Create unadapted control on Adaption (manual)
+## Step 1 — Import the original 240-row seed as an adaptation-ready source (manual)
 
 Run [Import PROOFBENCH 240-row training data](../.github/workflows/proofbench-upload.yml) from the **main** branch, with exact input:
 
@@ -20,7 +20,7 @@ Run [Import PROOFBENCH 240-row training data](../.github/workflows/proofbench-up
 APPROVE PROOFBENCH DATA UPLOAD
 ```
 
-The SDK uses `processing_mode="raw"` and `column_mapping={"prompt":"prompt","completion":"completion"}`. This is an upload operation, **not** a model-training or adaptation launch. Record the resulting dataset UUID and verify the returned dataset row count in Adaption.
+The SDK explicitly uploads with `processing_mode="adapt"`, so the source is eligible for a subsequent `datasets.adapt` call. It does **not** invoke `datasets.adapt` or AutoScientist during upload. The untouched original training JSONL remains preserved in the reproducible GitHub release as the scientific control, with a SHA-256 manifest. Record the new Adaption dataset UUID and verify its ingestion status and 240-row count before requesting any quote.
 
 **Do not repeat a failed/uncertain upload before checking the Adaption account for an already-created dataset.** File upload may not be idempotent.
 
@@ -37,7 +37,7 @@ The action uses `estimate=True`. As documented by Adaption, estimating may **sav
 
 The standalone estimate can return a price higher than 10 credits; do not launch in that case. The separate guarded-launch script repeats the quote immediately before any start, with the **same exact configuration**, and aborts above 10 estimated credits.
 
-**Important platform compatibility gate:** The uploaded `raw` dataset may already be marked processed and Adaption could reject an adaptation of that dataset with HTTP 400. If the quote fails, do **not** launch and do not keep retrying. We must first verify with Adaption whether a separate adaptation-ready import is required. The current scripts do not assume raw-to-adapt conversion is supported.
+**Provider compatibility gate:** The import must finish with 240 rows and recognizable `prompt` and `completion` columns. The first estimate must succeed using exactly these columns and the fixed recipe. If Adaption responds with HTTP 400 or rejects the mapping, stop and inspect the dataset state; do not repeatedly create datasets or launch adaptation.
 
 ## Step 3 — Launch only with explicit approval (optional, credit-consuming)
 
@@ -73,7 +73,7 @@ Official Adaption Dataset Challenge submission deadline: **December 6, 2026, 11:
 
 1. PR for guarded workflow must be merged into `main`.
 2. Original 240-row seed has not yet been confirmed imported into Adaption.
-3. Provider raw-to-adaptation compatibility is not yet known.
+3. The newly imported adaptation-ready dataset ID, ingestion status, and actual quote have not yet been verified.
 4. No real PROOFBENCH adaptation cost or completion evidence exists.
 5. No human-blind evaluation or genuine trained-model improvement is established.
 
