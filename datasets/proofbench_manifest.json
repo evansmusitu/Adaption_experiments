@@ -1,0 +1,30 @@
+{
+  "counts": {
+    "dev": 120,
+    "stress": 96,
+    "train": 240
+  },
+  "data_origin": "deterministic fictional templates, not a model-generated dataset",
+  "families": [
+    "fx_missing",
+    "inventory_conflict",
+    "receipt_identity",
+    "interest_method",
+    "profit_overhead",
+    "fee_basis"
+  ],
+  "license": "CC0-1.0",
+  "measurement_status": "No model predictions or measured generalization improvement",
+  "review_status": "NOT human-reviewed, NOT an independent blind benchmark",
+  "seed": 20261120,
+  "sha256": {
+    "dev.jsonl": "8c7b0223da618857a3930ea7c8bb1d0ace2e7eac7806d9bfa87eded3fb05b22c",
+    "stress.jsonl": "8ce3574e0624ad805dfc7b45f5c873104ba6a705f5bb5053231342ed77a5ba3f",
+    "train.jsonl": "d8f0aa9eeddb77bafe0e6d8b7d616501daa8d7f36487c9148e3860ce051205e5"
+  },
+  "train_columns": [
+    "prompt",
+    "completion"
+  ],
+  "version": "proofbench-paired-v1"
+}
