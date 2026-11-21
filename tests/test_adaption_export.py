@@ -37,7 +37,10 @@ class AdaptionExportTests(unittest.TestCase):
 
     def factory(self, status="succeeded", processed=EXPECTED_ROWS):
         ds = Mock()
-        ds.get_status.return_value = SimpleNamespace(status=status, processed_rows=processed)
+        ds.get_status.return_value = SimpleNamespace(
+            status=status,
+            progress=SimpleNamespace(processed_rows=processed),
+        )
         ds.download.return_value.read.return_value = self.payload()
         factory = Mock(return_value=SimpleNamespace(datasets=ds))
         return factory, ds
@@ -72,6 +75,13 @@ class AdaptionExportTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     download_for_review(self.root / "out", "token", client_factory=factory)
                 ds.download.assert_not_called()
+
+    def test_succeeded_with_null_progress_still_requires_100_exported_rows(self):
+        factory, ds = self.factory()
+        ds.get_status.return_value = SimpleNamespace(status="succeeded", progress=None)
+        result = download_for_review(self.root / "out", "key", client_factory=factory)
+        self.assertEqual(result["review_rows"], 100)
+        ds.download.assert_called_once_with(DATASET_ID, file_format="jsonl")
 
     def test_missing_key_never_contacts_provider(self):
         factory, ds = self.factory()

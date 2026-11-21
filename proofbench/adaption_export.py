@@ -65,10 +65,16 @@ def download_for_review(out_dir: Path, api_key: str, *, client_factory=None):
         client_factory = Adaption
     client = client_factory(api_key=api_key)
     status = client.datasets.get_status(DATASET_ID)
+    progress = getattr(status, "progress", None)
+    processed = getattr(progress, "processed_rows", None)
     print("EXPORT SAFE CHECK: status =", getattr(status, "status", None),
-          "processed rows =", getattr(status, "processed_rows", None))
-    if status.status != "succeeded" or status.processed_rows != EXPECTED_ROWS:
+          "processed rows =", processed)
+    if status.status != "succeeded":
         raise ValueError("Provider dataset is not fully adapted and ready for read-only export")
+    # The SDK nests processed_rows inside progress, which may be null after
+    # completion. Always enforce exactly 100 actual exported records below.
+    if processed is not None and (type(processed) is not int or processed != EXPECTED_ROWS):
+        raise ValueError("Provider reports an unexpected processed-row count")
 
     data = client.datasets.download(DATASET_ID, file_format="jsonl").read()
     print("EXPORT SAFE CHECK: returned type =", type(data).__name__,
