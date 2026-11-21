@@ -3,6 +3,9 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from io import StringIO
+from contextlib import redirect_stdout
+from unittest.mock import patch
 from proofbench.benchmark import write_release
 from proofbench.oracle_recheck import verify_train
 
@@ -45,6 +48,17 @@ class SourceOracleRecheckTests(unittest.TestCase):
         self.save()
         with self.assertRaisesRegex(ValueError, "duplicate"):
             verify_train(self.path)
+
+    def test_cli_distinguishes_success_boolean_from_verified_row_count(self):
+        from proofbench.oracle_recheck import main
+        output = StringIO()
+        with patch("sys.argv", ["oracle_recheck", "--train", str(self.path)]):
+            with redirect_stdout(output):
+                rc = main()
+        report = json.loads(output.getvalue())
+        self.assertEqual(rc, 0)
+        self.assertIs(report["ok"], True)
+        self.assertEqual(report["verified"], 240)
 
     def test_missing_case_rejected(self):
         self.rows.pop()
