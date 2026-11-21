@@ -65,10 +65,23 @@ def download_for_review(out_dir: Path, api_key: str, *, client_factory=None):
         client_factory = Adaption
     client = client_factory(api_key=api_key)
     status = client.datasets.get_status(DATASET_ID)
+    print("EXPORT SAFE CHECK: status =", getattr(status, "status", None),
+          "processed rows =", getattr(status, "processed_rows", None))
     if status.status != "succeeded" or status.processed_rows != EXPECTED_ROWS:
         raise ValueError("Provider dataset is not fully adapted and ready for read-only export")
 
     data = client.datasets.download(DATASET_ID, file_format="jsonl").read()
+    print("EXPORT SAFE CHECK: returned type =", type(data).__name__,
+          "byte count =", len(data) if isinstance(data, bytes) else "non-bytes")
+    if isinstance(data, bytes) and data:
+        try:
+            first_line = next(line for line in data.splitlines() if line.strip())
+            first_row = json.loads(first_line)
+            if isinstance(first_row, dict):
+                # Log ONLY field names, never any row contents or model output.
+                print("EXPORT SAFE CHECK: provider field names =", sorted(first_row))
+        except (ValueError, StopIteration, TypeError):
+            print("EXPORT SAFE CHECK: not parseable as standard JSONL")
     # Rebuild the exact checked-in deterministic synthetic seed release.
     generated = out_dir / "_verified_training_source"
     write_release(generated)
@@ -103,9 +116,13 @@ def main() -> int:
         return 2
     try:
         result = download_for_review(Path("review_only"), os.environ.get("ADAPTION_API_KEY", ""))
-    except Exception:
-        # No provider exception, presigned URL, headers or row text in logs.
-        print("EXPORT FAILED: no review-ready file produced. Examine provider schema using safe diagnostics.")
+    except (ValueError, PermissionError) as exc:
+        # Messages below are ours and deliberately contain no provider payload.
+        print("EXPORT CONTRACT FAILURE:", str(exc))
+        return 1
+    except Exception as exc:
+        # Print the exception class ONLY, not the provider message/headers/URLs.
+        print("EXPORT SDK FAILURE CLASS:", type(exc).__name__)
         return 1
     print("Read-only Adaption export verified:", result["review_rows"], "rows")
     print("Original SHA-256:", result["original_sha256"])
