@@ -8,13 +8,13 @@
 | Evidence | Status at 2026-11-21 | Where to obtain |
 |---|---|---|
 | Original source dataset (licence/provenance) | 240 original rows imported and verified; reproducible GitHub source retained | GitHub Actions artifact `train.jsonl`; `manifest.json` |
-| Dataset generated/improved **on Adaption** | PROOFBENCH 100-row adaptation succeeded; paired 100-row export obtained, but independent audit flagged 14 cases | Adaption account dataset IDs in previous account audit |
-| Before/after native Adaption quality scores | PROOFBENCH provider grade C→A, summary 7→9 (+28.6%); three older Invent results unrelated | Existing audited Adaption evaluations; label separately from PROOFBENCH |
-| PROOFBENCH before/after adapted dataset | Provider pilot complete; original and improved review exports both hashed; 14 flagged answers awaiting remediation | See content audit |
+| Dataset generated/improved **on Adaption** | Actual 100-row adaptation succeeded; original and improved exports obtained; 14 provider outputs flagged by independent screen | [Pilot evidence](VERIFIED_ADAPTION_PILOT.md) and [export workflow](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44938270782) |
+| Before/after native Adaption quality scores | Provider quality C→A, 7/10→9/10 (+28.6%); **not** model accuracy and not a grade for the corrected candidate | [Authenticated evaluation](VERIFIED_ADAPTION_PILOT.md) |
+| PROOFBENCH before/after adapted dataset | Both real JSONL files downloaded and SHA-256 verified; 14 flags, 15 local restorations; rights and expert review unresolved | [Content audit](POST_ADAPTATION_CONTENT_AUDIT.md) and [candidate provenance](CANDIDATE_PROVENANCE.md) |
 | Independent model benchmark | Evaluator works; **real predictions not yet collected** | `proofbench/benchmark.py` + `comparison.py` |
 | README and runnable instructions | Prepared | Repo README |
 | Human evaluation and blind set | Not yet | Follow research protocol |
-| Demo video or interactive assistant | Not yet | Prepare recorded demonstration from genuine results |
+| Demo video or interactive assistant | [Offline interactive demo](../demo/index.html) exists with verified provider result and disclosed audit findings; video not recorded | Demo is runnable locally; record final walkthrough if required |
 | Team's Adaption account verification PDF | Verify separately | Official Google verification form |
 | Final submission receipt | Not submitted | Hackyard/Unstop |
 
@@ -24,10 +24,16 @@
 - **Original seed:** 240 rows; **one approved adapted pilot:** 100 rows processed, provider status `succeeded`.
 - **Native quality evaluation:** C → A, provider summary 7/10 → 9/10 (+28.6%); raw evaluation includes finer-precision values and a separate 38.72% gain.
 - **Credit estimate:** 1; **actual charge:** not returned.
-- **Improved export:** still unavailable from linked tools; original/improved file hashes not yet produced. This remains the blocking gate before claiming a complete downloadable adaptation artifact.
+- **Improved export:** obtained from the official Adaption SDK and independently checked in the [GitHub Actions review-only artifact](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44938270782). Original SHA-256: `46f3ddb18efa5869b8dcd0b01839d1056397b3f14f690779c2faa1562a2a0c6b`; untouched enhanced SHA-256: `7127b6f681392ed43e63093ec371254c486c4e442f62d918d20944669dbeadb1`. Public redistribution and full correctness review remain open.
 - **Model improvement:** **not demonstrated**; requires real predictions and independent scoring.
 
 See [the authenticated pilot evidence](VERIFIED_ADAPTION_PILOT.md). Preserve numeric caveats and abstention behavior when reviewing any improved output. See [independent 100-row content audit](POST_ADAPTATION_CONTENT_AUDIT.md) and [read-only export artifact](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44938270782).
+
+## Derived candidate and remaining gates
+
+The separate, private **oracle-restored correction candidate** retains **85** exact provider rows and restores **15 exact** original prompt/completion pairs. It resolves 14 originally flagged rows and one additional rewritten-prompt drift. **This derived candidate has no Adaption grade**; the provider's C→A assessment applies only to the untouched enhanced export. Both files are retained for honest comparison. See [candidate provenance](CANDIDATE_PROVENANCE.md).
+
+Before public redistribution or a final submission, confirm generated-output redistribution rights, human-review all 100 rows, preserve original provider results and disclosed errors, decide which dataset versions may lawfully be shared, and finalize the hash-verified evidence manifest. The reviewer dashboard is private and available as a conversation artifact, not committed to the public repo. Independent baseline/candidate model accuracy remains unmeasured; make no such claim. The team/account verification, final demo recording if used, and one submission receipt remain outstanding.
 
 ## Verified existing Adaption assets
 
