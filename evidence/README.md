@@ -41,6 +41,8 @@ This template is documentation, **not** valid result evidence.
 
 Current verified pilot data and its evidence limitations: [`docs/VERIFIED_ADAPTION_PILOT.md`](../docs/VERIFIED_ADAPTION_PILOT.md).
 
+**Actual exports now exist as temporary review-only files**, not public `evidence/` release files: see [the successful read-only export workflow](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44938270782) and [the 100-row content audit](../docs/POST_ADAPTATION_CONTENT_AUDIT.md). Original SHA-256: `46f3ddb18efa5869b8dcd0b01839d1056397b3f14f690779c2faa1562a2a0c6b`; enhanced SHA-256: `7127b6f681392ed43e63093ec371254c486c4e442f62d918d20944669dbeadb1`. The enhanced data **failed quality screening in 14 flagged cases**, so do not promote it to the final released files until issues and rights are reviewed. The manifest gate remains intentionally closed.
+
 Generate the hashes using `sha256sum evidence/*.jsonl` on Linux or an
 equivalent secure local hashing tool. Confirm the imported source and adapted
 output identifiers, evaluation status and scores against the Adaption platform.
