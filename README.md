@@ -40,6 +40,19 @@ This repository is an isolated public hackathon workspace. Its primary research 
 
 Every scenario has two counterfactual variants, with independently computed decimal/integer oracles. Changing a single decisive condition changes the correct answer or whether an exact answer is justified.
 
+## Independently checked original answer keys
+
+The deterministic training generator emits **240 original source pairs**, 40 in each of six financial scenario families. A second [independent Decimal-based oracle](proofbench/oracle_recheck.py), deliberately separate from the generator's answer logic, re-derives all numeric results and missing-data abstentions; all **240/240 source keys** matched in the November 21 check. CI now fails if a release contains wrong arithmetic, duplicate prompts, malformed training columns or incomplete family coverage.
+
+Run after generating the source:
+
+```bash
+python3 -m proofbench.benchmark --output generated
+python3 -m proofbench.oracle_recheck --train generated/train.jsonl
+```
+
+The machine-readable result is packaged as `dataset/source_oracle_audit.json` in the Actions research bundle. **This validates synthetic original answers only**, not the correctness of all Adaption-rewritten outputs or any trained model. Read the [provider content audit](docs/POST_ADAPTATION_CONTENT_AUDIT.md) for observed adaptation errors.
+
 ## Reproduce locally
 
 Python 3.10+, **no API key, network, GPU or paid credits required**:
