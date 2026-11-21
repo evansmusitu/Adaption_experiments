@@ -1,7 +1,6 @@
 # Evidence directory — do not publish fabricated results
 
-This directory intentionally contains **no final results yet**. Files are added
-only after genuine Adaption processing and human evidence review.
+This directory now contains an **authenticated observation of a completed Adaption 100-row pilot** in `adaption_pilot_observation.json`. That observation contains provider-native metrics but **does not replace the required original/improved exported dataset files**. Final submission is still blocked until genuine improved output is obtained, hashed and reviewed.
 
 ## Required public release files
 
@@ -22,6 +21,7 @@ populate the following manifest *with real provider values*:
 {
   "original_dataset_id": "REPLACE-WITH-REAL-UUID",
   "improved_dataset_id": "REPLACE-WITH-REAL-UUID",
+  "in_place_adaptation": false,
   "run_id": "REPLACE-WITH-REAL-ADAPTION-RUN-ID",
   "evaluation_provider": "adaption",
   "evaluation_status": "succeeded",
@@ -36,6 +36,10 @@ populate the following manifest *with real provider values*:
 ```
 
 This template is documentation, **not** valid result evidence.
+
+**In-place Adaption adaptation:** The completed PROOFBENCH pilot returned the same dataset ID as its imported source. When the provider confirms the adapted output is in-place, set `in_place_adaptation: true` and use the same authentic dataset UUID for both ID fields **only after retrieving different real original and improved JSONL files**. The run ID must match `dataset-<dataset-uuid>-<numeric-run-suffix>`. The static integrity gate retains SHA-256 checks for each physical dataset file. Do not use the observation JSON as a surrogate for an improved export.
+
+Current verified pilot data and its evidence limitations: [`docs/VERIFIED_ADAPTION_PILOT.md`](../docs/VERIFIED_ADAPTION_PILOT.md).
 
 Generate the hashes using `sha256sum evidence/*.jsonl` on Linux or an
 equivalent secure local hashing tool. Confirm the imported source and adapted

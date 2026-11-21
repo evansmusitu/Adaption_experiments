@@ -1,0 +1,37 @@
+name: Export completed PROOFBENCH pilot for review (read-only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proofbench-adaption-review-export
+  cancel-in-progress: false
+
+jobs:
+  export:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install supported Adaption SDK
+        run: python3 -m pip install --disable-pip-version-check 'adaption>=0.9.0'
+      - name: Verify read-only exporter tests
+        run: python3 -m unittest discover -s tests -p 'test_adaption_export.py' -v
+      - name: Download the completed 100-row provider output (no adaptation)
+        env:
+          ADAPTION_API_KEY: ${{ secrets.ADAPTION_API_KEY }}
+        run: python3 -m proofbench.adaption_export
+      - name: Upload review-only original and improved JSONL artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofbench-adaption-review-only
+          path: |
+            review_only/original.jsonl
+            review_only/improved.jsonl
+            review_only/review_manifest.json
+          if-no-files-found: error
+          retention-days: 7

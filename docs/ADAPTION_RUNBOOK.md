@@ -1,6 +1,6 @@
 # Adaption pilot operator runbook
 
-**State:** Workflow prepared; no PROOFBENCH dataset import/adaptation launch is claimed by this document.
+**State (November 21, 2026):** PROOFBENCH seed imported (240 rows) and a single approved 100-row Adaption pilot has **succeeded**. Provider results are recorded in [VERIFIED_ADAPTION_PILOT.md](VERIFIED_ADAPTION_PILOT.md). Never re-launch this same dataset to reproduce evidence.
 
 This project separates **dataset import**, **cost quotation**, and **credit-consuming adaptation**. Do not confuse an initial Adaption Invent experiment with improving this verified training seed.
 
@@ -12,7 +12,7 @@ This project separates **dataset import**, **cost quotation**, and **credit-cons
 - All main-branch CI checks pass.
 - Only the owner may authorize an upload or credit-consuming run.
 
-## Step 1 — Import the original 240-row seed as an adaptation-ready source (manual)
+## Step 1 — Import the original 240-row seed as an adaptation-ready source (historical; completed)
 
 Run [Import PROOFBENCH 240-row training data](../.github/workflows/proofbench-upload.yml) from the **main** branch, with exact input:
 
@@ -28,7 +28,7 @@ Verify the new dataset with [PROOFBENCH import status (read-only)](../.github/wo
 
 Do not assume that the upload's original `240` input rows were ingested merely because GitHub emitted a dataset ID; wait for an authenticated read-only status confirmation.
 
-## Step 2 — Quote a 100-row financial adaptation (manual, estimate only)
+## Step 2 — Quote a 100-row financial adaptation (historical; completed)
 
 Open [Quote PROOFBENCH adaptation](../.github/workflows/proofbench-estimate.yml), choose `main`, and enter the new PROOFBENCH dataset UUID. The quote uses:
 - Source columns: `prompt` and `completion`
@@ -43,7 +43,7 @@ The standalone estimate can return a price higher than 10 credits; do not launch
 
 **Provider compatibility gate:** The import must finish with 240 rows and recognizable `prompt` and `completion` columns. The first estimate must succeed using exactly these columns and the fixed recipe. If Adaption responds with HTTP 400 or rejects the mapping, stop and inspect the dataset state; do not repeatedly create datasets or launch adaptation.
 
-## Step 3 — Launch only with explicit approval (optional, credit-consuming)
+## Step 3 — Launch only with explicit approval (historical; already completed once)
 
 After a successful estimate and source-dataset compatibility check, the owner may use [PROOFBENCH credit-capped adaptation](../.github/workflows/proofbench-adaption-launch.yml) on `main`.
 
@@ -73,13 +73,14 @@ After a genuine Adaption run finishes:
 
 Official Adaption Dataset Challenge submission deadline: **December 6, 2026, 11:59 PM India Standard Time (8:29 PM Zimbabwe)**. Use one approved submission platform and separately complete team account verification. Model training remains optional under the current main event instructions.
 
-## Current unresolved gates
+## Current verified state and unresolved gates
 
-1. PR for guarded workflow must be merged into `main`.
-2. Original 240-row seed has not yet been confirmed imported into Adaption.
-3. The newly imported adaptation-ready dataset ID, ingestion status, and actual quote have not yet been verified.
-4. No real PROOFBENCH adaptation cost or completion evidence exists.
-5. No human-blind evaluation or genuine trained-model improvement is established.
+1. **Import: complete.** 240 seed rows imported, dataset `eefe77fe-ba8c-4d54-9341-97c327a47fd3`, prompt/completion columns verified.
+2. **Pilot: complete.** One explicitly approved 100-row Adaption adaptation was accepted, processed 100/100 rows, and returned `succeeded` with successful native evaluation on November 21, 2026.
+3. **Native dataset-quality improvement: verified.** Provider summary grade C → A and quality 7/10 → 9/10 (+28.6%). See [the full precision and provenance caveats](VERIFIED_ADAPTION_PILOT.md).
+4. **Credits: quote verified, actual charge not.** The quote was 1 Adaption credit; final billed usage is not available in the checked read-only response.
+5. **Improved data export: missing.** `get_dataset_export_links` returned null URLs. Do not fabricate improved rows/hashes or a second dataset UUID.
+6. **Submission and model-quality evidence: incomplete.** Human review and real baseline/candidate model comparisons not yet performed; the manifest gate must remain closed until actual exported original/improved JSONL files and their hashes exist.
 
 ### Authoritative references
 
