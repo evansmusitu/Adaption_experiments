@@ -79,8 +79,8 @@ Official Adaption Dataset Challenge submission deadline: **December 6, 2026, 11:
 2. **Pilot: complete.** One explicitly approved 100-row Adaption adaptation was accepted, processed 100/100 rows, and returned `succeeded` with successful native evaluation on November 21, 2026.
 3. **Native dataset-quality improvement: verified.** Provider summary grade C → A and quality 7/10 → 9/10 (+28.6%). See [the full precision and provenance caveats](VERIFIED_ADAPTION_PILOT.md).
 4. **Credits: quote verified, actual charge not.** The quote was 1 Adaption credit; final billed usage is not available in the checked read-only response.
-5. **Improved data export: missing.** `get_dataset_export_links` returned null URLs. Do not fabricate improved rows/hashes or a second dataset UUID.
-6. **Submission and model-quality evidence: incomplete.** Human review and real baseline/candidate model comparisons not yet performed; the manifest gate must remain closed until actual exported original/improved JSONL files and their hashes exist.
+5. **Improved data export: obtained, awaiting review.** External publication URLs were null, but the official SDK `datasets.download(..., file_format="jsonl")` retrieved 100 real enhanced rows. The [GitHub Actions review artifact](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44938270782) contains original and improved pairs with distinct SHA-256 hashes. An [independent audit](POST_ADAPTATION_CONTENT_AUDIT.md) flagged 14 cases (4 unambiguous answer/assumption defects, 10 negative-stock rubric mismatches). **Do not automatically publish the enhanced rows.**
+6. **Submission and model-quality evidence: incomplete.** Human review and real baseline/candidate model comparisons have not been performed. Although export files and hashes now exist in a review artifact, the manifest gate stays closed until final reviewed files, rights and provenance are accepted for public release.
 
 ### Authoritative references
 
