@@ -105,6 +105,12 @@ The original provider output is preserved unchanged, but independent review iden
 
 **The corrected candidate is NOT an Adaption Grade A dataset**: the native quality score applies to the raw provider output only. No complete human review, independent model comparison or enhanced-output public redistribution clearance has yet been established. The original and enhanced JSONL files remain private review artifacts rather than committed to this public repository.
 
+## Private review completion preflight
+
+An offline, fail-closed [review decision checker](proofbench/reviewer_preflight.py) now validates the 100-case review JSON exported by the private reviewer dashboard against the exact candidate hashes and 85/15 source classification. [Reviewer instructions](docs/HUMAN_REVIEW_RELEASE_GATES.md) explain the workflow.
+
+**No reviewer decisions are assumed.** The gate remains closed until all 100 cases are individually approved; even then, it never authenticates the reviewer or authorizes publication. Adaption output redistribution rights, independent human review and a separate owner publication decision are still required. No paid calls are made.
+
 ## Adaption integration and credit safety
 
 GitHub Actions has successfully authenticated to Adaption via the `ADAPTION_API_KEY` secret, checked the three existing invented datasets, and retrieved native evaluation summaries.
