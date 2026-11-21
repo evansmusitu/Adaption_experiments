@@ -8,9 +8,9 @@
 | Evidence | Status at 2026-11-21 | Where to obtain |
 |---|---|---|
 | Original source dataset (licence/provenance) | 240 original rows imported and verified; reproducible GitHub source retained | GitHub Actions artifact `train.jsonl`; `manifest.json` |
-| Dataset generated/improved **on Adaption** | PROOFBENCH 100-row adaptation succeeded; actual improved-row export still missing | Adaption account dataset IDs in previous account audit |
+| Dataset generated/improved **on Adaption** | PROOFBENCH 100-row adaptation succeeded; paired 100-row export obtained, but independent audit flagged 14 cases | Adaption account dataset IDs in previous account audit |
 | Before/after native Adaption quality scores | PROOFBENCH provider grade C→A, summary 7→9 (+28.6%); three older Invent results unrelated | Existing audited Adaption evaluations; label separately from PROOFBENCH |
-| PROOFBENCH before/after adapted dataset | Provider pilot complete; improved-row export and hashes still missing | See verified pilot report |
+| PROOFBENCH before/after adapted dataset | Provider pilot complete; original and improved review exports both hashed; 14 flagged answers awaiting remediation | See content audit |
 | Independent model benchmark | Evaluator works; **real predictions not yet collected** | `proofbench/benchmark.py` + `comparison.py` |
 | README and runnable instructions | Prepared | Repo README |
 | Human evaluation and blind set | Not yet | Follow research protocol |
@@ -27,7 +27,7 @@
 - **Improved export:** still unavailable from linked tools; original/improved file hashes not yet produced. This remains the blocking gate before claiming a complete downloadable adaptation artifact.
 - **Model improvement:** **not demonstrated**; requires real predictions and independent scoring.
 
-See [the authenticated pilot evidence](VERIFIED_ADAPTION_PILOT.md). Preserve numeric caveats and abstention behavior when reviewing any improved output.
+See [the authenticated pilot evidence](VERIFIED_ADAPTION_PILOT.md). Preserve numeric caveats and abstention behavior when reviewing any improved output. See [independent 100-row content audit](POST_ADAPTATION_CONTENT_AUDIT.md) and [read-only export artifact](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44938270782).
 
 ## Verified existing Adaption assets
 
@@ -45,7 +45,7 @@ All three datasets were authenticated and inspected by read-only GitHub Actions.
 2. Inspect the generated train/dev/stress artifacts. Review synthetic labels and add independently written cases.
 3. **Complete:** Original 240-row source was imported once; Adaption dataset ID recorded above. Do **not** reimport or re-adapt merely to check status.
 4. **Complete:** Real live estimate of 1 Adaption credit and explicit pilot approval were recorded; actual billed credit usage remains unknown.
-5. **Complete except exports:** One 100-row adaptation succeeded; run ID recorded above. Obtain actual improved rows and their hashes before claiming downloadable deliverables.
+5. **Export obtained; content review incomplete:** One 100-row adaptation succeeded; the actual original and enhanced JSONL files were downloaded and hashed in GitHub Actions. Review found 14 flagged cases. Keep the untouched output as an evidence artifact, not an accuracy-approved dataset.
 6. **Complete for native quality only:** Adaption returned a successful C→A evaluation; independent model predictions and human review remain outstanding.
 7. Produce README evidence table and truthful three-minute video; include negative results and failure analysis.
 8. Complete one account verification PDF (separate submission) and submit the project exactly once. Save timestamp and receipt.
