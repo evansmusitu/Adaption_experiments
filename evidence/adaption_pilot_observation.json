@@ -1,0 +1,54 @@
+{
+  "evidence_type": "adaption_mcp_observation_not_signed_provider_attestation",
+  "observed_on": "2026-11-21",
+  "source_tools": [
+    "Adaption.get_dataset_status",
+    "Adaption.get_dataset_evaluation",
+    "Adaption.get_dataset",
+    "Adaption.get_dataset_export_links"
+  ],
+  "dataset_id": "eefe77fe-ba8c-4d54-9341-97c327a47fd3",
+  "dataset_name": "zimbabwe_business_math",
+  "run_id": "dataset-eefe77fe-ba8c-4d54-9341-97c327a47fd3-1795285525492",
+  "dataset_status": "succeeded",
+  "evaluation_status": "succeeded",
+  "source_row_count": 240,
+  "processed_row_count": 100,
+  "progress_percentage": 100,
+  "column_mapping": {
+    "prompt": "prompt",
+    "completion": "completion"
+  },
+  "provider_summary": {
+    "grade_before": "C",
+    "grade_after": "A",
+    "score_before": 7,
+    "score_after": 9,
+    "improvement_percent": 28.6
+  },
+  "provider_raw_quality_percentile": {
+    "score_before": 6.5,
+    "score_after": 9,
+    "overall_percentage_gain": 38.72
+  },
+  "provider_quality_details": {
+    "message_quality": {
+      "before": 7.07,
+      "after": 8.11,
+      "gain_percent": 14.7
+    },
+    "completion_quality": {
+      "before": 5.87,
+      "after": 9.84,
+      "gain_percent": 67.6
+    }
+  },
+  "provider_evaluation_timestamp_utc": "2026-11-21T18:34:15.566874+00:00",
+  "estimated_adaption_credits": 1,
+  "actual_adaption_credits": null,
+  "improved_export_available": false,
+  "original_and_improved_jsonl_downloaded": false,
+  "external_model_baseline_comparison_completed": false,
+  "human_blind_review_completed": false,
+  "notes": "Rounded summary and detailed raw evaluation use different score precision; do not calculate a single unexplained growth percentage from mixed precisions. This is Adaption native dataset quality, not measured model accuracy. No signed provider attestation or export hashes are claimed."
+}
