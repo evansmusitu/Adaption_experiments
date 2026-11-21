@@ -17,6 +17,7 @@ on:
       - 'tests/test_submission_gate.py'
       - 'tests/test_adaption_run.py'
       - 'tests/test_adaption_status.py'
+      - 'tests/test_candidate_integrity.py'
       - '.github/workflows/proofbench-adversarial.yml'
   pull_request:
     paths:
@@ -33,6 +34,7 @@ on:
       - 'tests/test_submission_gate.py'
       - 'tests/test_adaption_run.py'
       - 'tests/test_adaption_status.py'
+      - 'tests/test_candidate_integrity.py'
       - '.github/workflows/proofbench-adversarial.yml'
   workflow_dispatch:
 
@@ -58,6 +60,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_submission_gate.py' -v
           python3 -m unittest discover -s tests -p 'test_adaption_run.py' -v
           python3 -m unittest discover -s tests -p 'test_adaption_status.py' -v
+          python3 -m unittest discover -s tests -p 'test_candidate_integrity.py' -v
       - name: Produce reproducible demonstration artifacts
         if: success()
         run: python3 -m proofbench.benchmark --output generated
@@ -70,7 +73,7 @@ jobs:
           cp -r .github/workflows release/.github/
           cp README.md release/README.md
           cp generated/*.jsonl generated/manifest.json release/dataset/
-          printf '%s\n' 'This package is a pre-submission prototype. Provider adaptation and model performance are not yet established.' > release/STATUS.txt
+          printf '%s\n' 'Adaption 100-row pilot dataset-quality improvement is verified (C to A). Independent model accuracy and public rights for provider outputs are NOT established. Corrected candidate remains private review-only.' > release/STATUS.txt
           test -f release/demo/index.html
           test -f release/proofbench/benchmark.py
           test -f release/.github/workflows/proofbench-adaption-launch.yml
