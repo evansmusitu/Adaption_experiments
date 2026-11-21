@@ -75,6 +75,20 @@ jobs:
       - name: Produce reproducible demonstration artifacts
         if: success()
         run: python3 -m proofbench.benchmark --output generated
+      - name: Independently verify all 240 generated source labels
+        if: success()
+        run: |
+          python3 -m proofbench.oracle_recheck --train generated/train.jsonl > generated/source_oracle_audit.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          audit = json.loads(Path('generated/source_oracle_audit.json').read_text())
+          assert audit['verified'] is True
+          assert audit['checked'] == audit['verified'] == 240
+          assert set(audit['families'].values()) == {40}
+          assert audit['establishes_model_accuracy'] is False
+          print('Independent financial oracle confirms all 240 synthetic source labels')
+          PY
       - name: Package reproducible hackathon preview
         if: success()
         run: |
@@ -83,7 +97,7 @@ jobs:
           mkdir -p release/.github
           cp -r .github/workflows release/.github/
           cp README.md release/README.md
-          cp generated/*.jsonl generated/manifest.json release/dataset/
+          cp generated/*.jsonl generated/manifest.json generated/source_oracle_audit.json release/dataset/
           printf '%s\n' 'Adaption 100-row pilot dataset-quality improvement is verified (C to A). Independent model accuracy and public rights for provider outputs are NOT established. Corrected candidate remains private review-only.' > release/STATUS.txt
           test -f release/demo/index.html
           test -f release/proofbench/benchmark.py
