@@ -6,7 +6,7 @@ This repository is an isolated public hackathon workspace. Its primary research 
 
 > Can targeted, mathematically verifiable, counterfactual financial examples improve AI answer reliability and appropriate abstention more than synthetic data expansion alone?
 
-**Status:** This is an engineered dataset and evaluation harness, **not yet a validated performance improvement**. No external model predictions or trained models are included. Do not interpret any test-suite 100% correctness as model accuracy.
+**Status:** The **Adaption-native 100-row dataset adaptation succeeded (C → A; provider summary 7/10 → 9/10)**. That is verified *dataset quality*, **not** an independently validated improvement in trained-model accuracy. No external model predictions or trained models are included; test-suite correctness is not model accuracy.
 
 ## What exists and what it proves
 
@@ -15,15 +15,19 @@ This repository is an isolated public hackathon workspace. Its primary research 
 | Original, deterministic synthetic training data | Built by `proofbench.benchmark` | 240 prompt/completion examples |
 | Separate adversarial development set | Built | 120 cases (60 paired scenarios) |
 | Stress test set | Built | 96 cases (48 paired scenarios) |
-| Leakage and mathematical sanity tests | CI-verified | Offline tests |\n| Independent re-parsing of generated answers | CI-verified | 456 synthetic answer keys audited |\n| Cross-dataset overlap | Read-only Adaption audit succeeded | 3,500 unique normalized prompts, 0 exact overlaps |\n| Interactive offline demo | Built | [Open demo source](demo/index.html) |\n| 100-row PROOFBENCH adaptation cost estimator | Prepared, not yet run on imported dataset | Manual GitHub Actions quote |
+| Leakage and mathematical sanity tests | CI-verified | Offline tests |
+| Independent re-parsing of generated answers | CI-verified | 456 synthetic answer keys audited |
+| Cross-dataset overlap | Read-only Adaption audit succeeded | 3,500 unique normalized prompts, 0 exact overlaps |
+| Interactive offline demo | Built | [Open demo source](demo/index.html) |
+| 100-row PROOFBENCH adaptation cost quotation | **Verified live** | 1 estimated credit; actual final usage not returned |
 | Counterfactual strict-pair scoring | Built and tested | `score_predictions` |
 | Paired comparison with grouped bootstrap + exact McNemar | Built and tested | `proofbench.comparison` |
-| Secure Adaption upload | Manual-only workflow prepared | Not launched |
+| Secure Adaption upload | **Completed** | 240 original rows, Adaption dataset `eefe77fe-ba8c-4d54-9341-97c327a47fd3` |
 | Adaption generated-data workspace | Existing read-only API audits | 3 existing invented datasets; 3,500 rows total |
-| PROOFBENCH dataset adapted on Adaption | **Not yet** | Requires import, quote and approval |
-| Genuine model before/after experiment | **Not yet** | Requires baseline/candidate predictions |
+| PROOFBENCH dataset adapted on Adaption | **Completed** | 100/100 rows processed; provider quality C → A, summary +28.6% |
+| Genuine model before/after experiment | **Not yet** | Requires baseline/candidate predictions; provider quality is not model accuracy |
 | Human-reviewed independent blind holdout | **Not yet** | Must be collected separately |
-| Hackathon submission | **Not yet** | Close Dec 6, 11:59 PM IST |
+| Hackathon submission | **Not yet** | Improved-row export and final evidence still missing; closes Dec 6, 11:59 PM IST |
 
 ### Six scenario families
 
@@ -43,7 +47,10 @@ Python 3.10+, **no API key, network, GPU or paid credits required**:
 ```bash
 python3 -m unittest discover -s tests -p 'test_proofbench_contract.py' -v
 python3 -m unittest discover -s tests -p 'test_comparison.py' -v
-python3 -m unittest discover -s tests -p 'test_adaption_bridge.py' -v\npython3 -m unittest discover -s tests -p 'test_independent_audit.py' -v\npython3 -m unittest discover -s tests -p 'test_adaption_estimate.py' -v\npython3 -m unittest discover -s tests -p 'test_overlap.py' -v
+python3 -m unittest discover -s tests -p 'test_adaption_bridge.py' -v
+python3 -m unittest discover -s tests -p 'test_independent_audit.py' -v
+python3 -m unittest discover -s tests -p 'test_adaption_estimate.py' -v
+python3 -m unittest discover -s tests -p 'test_overlap.py' -v
 python3 -m proofbench.benchmark --output generated
 ```
 
@@ -73,15 +80,31 @@ python3 -m proofbench.comparison \
 
 The evaluator enforces full correct pairs, numeric units, precision and abstention. `comparison.py` computes paired-group bootstrap uncertainty and an exact McNemar p-value at the pair level. It **never generates fake model scores**.
 
+## Verified Adaption 100-row pilot — November 21, 2026
+
+The connected Adaption account confirms **100 out of 100 pilot rows succeeded**, with native quality grade **C → A**, provider headline score **7/10 → 9/10**, and reported **+28.6%** summary improvement. It separately reports prompt quality **7.07 → 8.11** and completion quality **5.87 → 9.84**. Raw precision differs (before 6.5; overall raw gain 38.72%); the provider reports both representations, not two independent trials.
+
+The pre-launch quote was **1 credit**; **actual final credit usage has not been independently returned**. No improved data export URL is available yet, and no model accuracy or independent arithmetic correctness of enhanced rows is claimed. See [verified provider evidence, exact run ID, limitations and outstanding export work](docs/VERIFIED_ADAPTION_PILOT.md) and [machine-readable observation](evidence/adaption_pilot_observation.json).
+
 ## Adaption integration and credit safety
 
 GitHub Actions has successfully authenticated to Adaption via the `ADAPTION_API_KEY` secret, checked the three existing invented datasets, and retrieved native evaluation summaries.
 
 The **manual-only** workflow `.github/workflows/proofbench-upload.yml` prepares an authenticated dataset upload from `generated/train.jsonl`. It requires the exact input `APPROVE PROOFBENCH DATA UPLOAD`, executes only on `main`, and has no adaptation/training calls. The upload changes the Adaption account; **do not repeat it after an uncertain outcome**. It is not a substitute for the separate credit-approved adaptation workflow.
 
-The estimate-only workflow `.github/workflows/proofbench-estimate.yml` is manually dispatched with the new PROOFBENCH dataset UUID. It validates a 100-row pilot quote and cannot launch adaptation. The source import uses `processing_mode="adapt"` to prepare for the later adaptation call; the unchanged `train.jsonl` and its SHA-256 manifest in GitHub preserve the original control data. The import workflow itself does not call `datasets.adapt` or train a model. Verify 240 ingested rows and the quoted mapping before approving any credits.\n\nThe manual-only `proofbench-adaption-launch.yml` implements a fresh 100-row quote and explicit approval gate for up to 10 **estimated** credits using the exact same configuration as `proofbench-estimate.yml`. **Final provider usage may differ from quoted credits.** The runbook at [docs/ADAPTION_RUNBOOK.md](docs/ADAPTION_RUNBOOK.md) explains the import, compatibility and non-retry rules.\n\nThe pre-existing `adaption-launch-proofbench.yml` is a different credit-consuming Invent experiment. Do **not** launch it assuming it adapts this training file; Invent and Adapt are distinct Adaption workflows.
+The estimate-only workflow `.github/workflows/proofbench-estimate.yml` remains available for other, separately authorized new source IDs. The completed 100-row pilot was **quoted and launched once through Adaption MCP**; never rerun the source's adaptation to reproduce the observation. The workflow itself does not launch adaptation. The source import uses `processing_mode="adapt"` to prepare for the later adaptation call; the unchanged `train.jsonl` and its SHA-256 manifest in GitHub preserve the original control data. The import workflow itself does not call `datasets.adapt` or train a model. Verify 240 ingested rows and the quoted mapping before approving any credits.
 
-## Demonstration and cross-dataset audit\n\nThe mobile-friendly [offline interactive demo](demo/index.html) presents six real fixtures from the deterministic generator. It does **not** claim model improvement or show fake baseline results.\n\nThe authenticated overlap audit inspected 500 + 1,000 + 2,000 existing Invent rows, finding 3,500 unique normalized prompts, zero exact normalized duplicates within any dataset, and zero exact shared prompts between datasets. This is a strict text-level result only; it does **not** rule out paraphrase or numeric-template repetition. See the authenticated GitHub Actions run #44738341995.\n\n## Research quality limitations
+The manual-only `proofbench-adaption-launch.yml` implements a fresh 100-row quote and explicit approval gate for up to 10 **estimated** credits using the exact same configuration as `proofbench-estimate.yml`. **Final provider usage may differ from quoted credits.** The runbook at [docs/ADAPTION_RUNBOOK.md](docs/ADAPTION_RUNBOOK.md) explains the import, compatibility and non-retry rules.
+
+The pre-existing `adaption-launch-proofbench.yml` is a different credit-consuming Invent experiment. Do **not** launch it assuming it adapts this training file; Invent and Adapt are distinct Adaption workflows.
+
+## Demonstration and cross-dataset audit
+
+The mobile-friendly [offline interactive demo](demo/index.html) presents six real fixtures from the deterministic generator. It does **not** claim model improvement or show fake baseline results.
+
+The authenticated overlap audit inspected 500 + 1,000 + 2,000 existing Invent rows, finding 3,500 unique normalized prompts, zero exact normalized duplicates within any dataset, and zero exact shared prompts between datasets. This is a strict text-level result only; it does **not** rule out paraphrase or numeric-template repetition. See the authenticated GitHub Actions run #44738341995.
+
+## Research quality limitations
 
 - Data are programmatically synthetic, fictional and not human-reviewed.
 - Split groups and lexical templates differ, but all families share generative mechanisms; this is **not a true blinded out-of-distribution benchmark**.
