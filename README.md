@@ -86,6 +86,12 @@ The connected Adaption account confirms **100 out of 100 pilot rows succeeded**,
 
 The pre-launch quote was **1 credit**; **actual final credit usage has not been independently returned**. A **read-only SDK export of 100 enhanced rows** now exists in the [successful GitHub Actions review artifact](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44938270782). Independent screening flagged **14/100 rows** (4 confirmed numeric/assumption defects and 10 negative-stock rubric mismatches); do **not** infer model accuracy from the native provider quality grade. See [the content audit](docs/POST_ADAPTATION_CONTENT_AUDIT.md), [provider assessment](docs/VERIFIED_ADAPTION_PILOT.md), and [machine-readable observation](evidence/adaption_pilot_observation.json).
 
+## Corrected candidate: private review only
+
+The original provider output is preserved unchanged, but independent review identified 14 flagged rows and one additional prompt-drift case. A separate research candidate therefore restores the exact original source prompt+completion for **15 rows** and retains the provider's output for **85 rows**. An offline, provider-free [candidate provenance verifier](proofbench/candidate_integrity.py) proves that all 100 rows come from one of those two sources and confirms their individual SHA-256 hashes. The [review protocol and hashes](docs/CANDIDATE_PROVENANCE.md) describe the evidence and how to rerun it.
+
+**The corrected candidate is NOT an Adaption Grade A dataset**: the native quality score applies to the raw provider output only. No complete human review, independent model comparison or enhanced-output public redistribution clearance has yet been established. The original and enhanced JSONL files remain private review artifacts rather than committed to this public repository.
+
 ## Adaption integration and credit safety
 
 GitHub Actions has successfully authenticated to Adaption via the `ADAPTION_API_KEY` secret, checked the three existing invented datasets, and retrieved native evaluation summaries.
