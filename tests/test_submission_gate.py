@@ -67,6 +67,33 @@ class SubmissionIntegrityTests(unittest.TestCase):
         self._set(improved_dataset_id=SOURCE_ID)
         self.assertFalse(inspect(self.root)["structurally_ready"])
 
+    def test_same_dataset_identifier_allowed_only_for_verified_in_place_run_shape(self):
+        # Adaption may process source and enhanced rows in one dataset ID,
+        # distinguished by a real run ID and two different exported artifacts.
+        self._set(
+            improved_dataset_id=SOURCE_ID,
+            in_place_adaptation=True,
+            run_id=f"dataset-{SOURCE_ID}-1795285525492",
+        )
+        self.assertTrue(inspect(self.root)["structurally_ready"])
+
+    def test_in_place_flag_rejects_unrelated_run_identifier(self):
+        self._set(
+            improved_dataset_id=SOURCE_ID,
+            in_place_adaptation=True,
+            run_id="dataset-unrelated-1795285525492",
+        )
+        self.assertFalse(inspect(self.root)["structurally_ready"])
+
+    def test_in_place_flag_does_not_bypass_file_integrity(self):
+        self._set(
+            improved_dataset_id=SOURCE_ID,
+            in_place_adaptation=True,
+            run_id=f"dataset-{SOURCE_ID}-1795285525492",
+        )
+        (self.root / "evidence" / "improved.jsonl").unlink()
+        self.assertFalse(inspect(self.root)["structurally_ready"])
+
     def test_fake_unfinished_evaluation_rejected(self):
         self._set(evaluation_status="pending")
         self.assertFalse(inspect(self.root)["structurally_ready"])
