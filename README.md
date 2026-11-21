@@ -105,6 +105,8 @@ The original provider output is preserved unchanged, but independent review iden
 
 **The corrected candidate is NOT an Adaption Grade A dataset**: the native quality score applies to the raw provider output only. No complete human review, independent model comparison or enhanced-output public redistribution clearance has yet been established. The original and enhanced JSONL files remain private review artifacts rather than committed to this public repository.
 
+The November 22 [second-pass semantic screen](docs/SECOND_PASS_SEMANTIC_SCREEN_20261122.md) checks all 100 source/provider/candidate pairs under additional deterministic rules. It records **15 distinct raw-provider review alerts and zero targeted alerts in the repaired candidate**. These are *screening* results, not full correctness certification or completed human approval. Both genuine exports remain private pending permissions and quality review.
+
 ## Private review completion preflight
 
 An offline, fail-closed [review decision checker](proofbench/reviewer_preflight.py) now validates the 100-case review JSON exported by the private reviewer dashboard against the exact candidate hashes and 85/15 source classification. [Reviewer instructions](docs/HUMAN_REVIEW_RELEASE_GATES.md) explain the workflow.
