@@ -83,7 +83,7 @@ jobs:
           import json
           from pathlib import Path
           audit = json.loads(Path('generated/source_oracle_audit.json').read_text())
-          assert audit['verified'] is True
+          assert audit['ok'] is True
           assert audit['checked'] == audit['verified'] == 240
           assert set(audit['families'].values()) == {40}
           assert audit['establishes_model_accuracy'] is False
