@@ -143,9 +143,9 @@ def main():
     try:
         result = verify_train(args.train)
     except (OSError, ValueError) as exc:
-        print(json.dumps({"verified": False, "error": str(exc)}))
+        print(json.dumps({"ok": False, "error": str(exc)}))
         return 2
-    print(json.dumps({"verified": True, **result}, indent=2, sort_keys=True))
+    print(json.dumps({"ok": True, **result}, indent=2, sort_keys=True))
     return 0
 
 
