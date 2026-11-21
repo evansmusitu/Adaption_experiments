@@ -21,6 +21,7 @@ on:
       - 'tests/test_public_demo_evidence.py'
       - 'tests/test_hackathon_readiness_doc.py'
       - 'tests/test_oracle_recheck.py'
+      - 'tests/test_reviewer_preflight.py'
       - 'demo/**'
       - '.github/workflows/proofbench-adversarial.yml'
   pull_request:
@@ -42,6 +43,7 @@ on:
       - 'tests/test_public_demo_evidence.py'
       - 'tests/test_hackathon_readiness_doc.py'
       - 'tests/test_oracle_recheck.py'
+      - 'tests/test_reviewer_preflight.py'
       - 'demo/**'
       - '.github/workflows/proofbench-adversarial.yml'
   workflow_dispatch:
@@ -72,6 +74,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_public_demo_evidence.py' -v
           python3 -m unittest discover -s tests -p 'test_hackathon_readiness_doc.py' -v
           python3 -m unittest discover -s tests -p 'test_oracle_recheck.py' -v
+          python3 -m unittest discover -s tests -p 'test_reviewer_preflight.py' -v
       - name: Produce reproducible demonstration artifacts
         if: success()
         run: python3 -m proofbench.benchmark --output generated
