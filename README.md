@@ -27,7 +27,7 @@ This repository is an isolated public hackathon workspace. Its primary research 
 | PROOFBENCH dataset adapted on Adaption | **Completed** | 100/100 rows processed; provider quality C → A, summary +28.6% |
 | Genuine model before/after experiment | **Not yet** | Requires baseline/candidate predictions; provider quality is not model accuracy |
 | Human-reviewed independent blind holdout | **Not yet** | Must be collected separately |
-| Hackathon submission | **Not yet** | Improved-row export and final evidence still missing; closes Dec 6, 11:59 PM IST |
+| Hackathon submission | **Not yet** | Review/repair of enhanced rows, final evidence and model test still missing; closes Dec 6, 11:59 PM IST |
 
 ### Six scenario families
 
@@ -84,7 +84,7 @@ The evaluator enforces full correct pairs, numeric units, precision and abstenti
 
 The connected Adaption account confirms **100 out of 100 pilot rows succeeded**, with native quality grade **C → A**, provider headline score **7/10 → 9/10**, and reported **+28.6%** summary improvement. It separately reports prompt quality **7.07 → 8.11** and completion quality **5.87 → 9.84**. Raw precision differs (before 6.5; overall raw gain 38.72%); the provider reports both representations, not two independent trials.
 
-The pre-launch quote was **1 credit**; **actual final credit usage has not been independently returned**. No improved data export URL is available yet, and no model accuracy or independent arithmetic correctness of enhanced rows is claimed. See [verified provider evidence, exact run ID, limitations and outstanding export work](docs/VERIFIED_ADAPTION_PILOT.md) and [machine-readable observation](evidence/adaption_pilot_observation.json).
+The pre-launch quote was **1 credit**; **actual final credit usage has not been independently returned**. A **read-only SDK export of 100 enhanced rows** now exists in the [successful GitHub Actions review artifact](https://github.com/evansmusitu/Adaption_experiments/actions/runs/44938270782). Independent screening flagged **14/100 rows** (4 confirmed numeric/assumption defects and 10 negative-stock rubric mismatches); do **not** infer model accuracy from the native provider quality grade. See [the content audit](docs/POST_ADAPTATION_CONTENT_AUDIT.md), [provider assessment](docs/VERIFIED_ADAPTION_PILOT.md), and [machine-readable observation](evidence/adaption_pilot_observation.json).
 
 ## Adaption integration and credit safety
 
