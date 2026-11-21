@@ -46,8 +46,21 @@ def inspect(root) -> dict:
         }
 
     a, b = manifest.get("original_dataset_id"), manifest.get("improved_dataset_id")
-    if not _valid_uuid(a) or not _valid_uuid(b) or a == b:
-        errors.append("Original/improved Adaption dataset identifiers are missing, invalid or identical")
+    if not _valid_uuid(a) or not _valid_uuid(b):
+        errors.append("Original/improved Adaption dataset identifiers are missing or invalid")
+    elif a == b:
+        # Some Adaption pipelines enhance rows in-place under one dataset UUID.
+        # Require an explicit declaration and a run ID tied to that UUID;
+        # both original and improved physical files and distinct hashes remain
+        # mandatory below. This is only structural validation.
+        if manifest.get("in_place_adaptation") is not True:
+            errors.append("Identical dataset IDs require an explicit in-place declaration")
+        elif not isinstance(manifest.get("run_id"), str) or not re.fullmatch(
+            rf"dataset-{re.escape(a)}-[0-9]+", manifest["run_id"]
+        ):
+            errors.append("In-place adaptation run ID does not match the dataset ID")
+    elif manifest.get("in_place_adaptation") is True:
+        errors.append("In-place flag conflicts with distinct dataset identifiers")
     if not isinstance(manifest.get("run_id"), str) or not manifest["run_id"].strip():
         errors.append("Missing adaptation run ID")
     if manifest.get("evaluation_provider") != "adaption" or manifest.get("evaluation_status") != "succeeded":
